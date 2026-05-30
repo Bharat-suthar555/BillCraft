@@ -9,15 +9,15 @@ import {
   updateTemplate,
 } from '@/lib/firestore';
 import { DEFAULT_TEMPLATE, EMPTY_LINE_ITEM, TemplateSettings } from '@/types';
+import { useAuth } from '@/contexts/AuthContext';
 import { Check, ChevronRight, Copy, PlusCircle, Trash2 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
-const DEMO_INVOICE = {
+const DEMO_INVOICE_BASE = {
   billNo: 'INV-001',
   date: new Date().toISOString().split('T')[0],
-  customerName: 'Bharat Kumar',
-  customerPhone: '+91 8094325459',
+  customerPhone: '+91 9876543215',
   customerAddress: 'Rampura Colony, Jalore',
   lineItems: [
     {
@@ -41,6 +41,7 @@ const DEMO_INVOICE = {
 };
 
 export default function TemplatesPage() {
+  const { user } = useAuth();
   const [templates, setTemplates] = useState<TemplateSettings[]>([]);
   const [selected, setSelected] = useState<TemplateSettings | null>(null);
   const [dirty, setDirty] = useState<TemplateSettings | null>(null);
@@ -49,6 +50,11 @@ export default function TemplatesPage() {
   const previewRef = useRef<HTMLDivElement>(null);
 
   const active = dirty ?? selected;
+
+  const demoInvoice = {
+    ...DEMO_INVOICE_BASE,
+    customerName: user?.displayName ?? 'Bharat Suthar',
+  };
 
   useEffect(() => {
     getTemplates()
@@ -279,7 +285,7 @@ export default function TemplatesPage() {
               <div className='overflow-auto rounded-lg bg-muted/40 p-4 lg:max-h-[75vh]'>
                 <div style={{ width: 794 * scale, height: 1123 * scale }}>
                   <InvoicePreview
-                    invoice={DEMO_INVOICE}
+                    invoice={demoInvoice}
                     template={active}
                     scale={scale}
                   />
