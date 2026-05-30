@@ -10,6 +10,7 @@ import {
   PenTool,
   PlusCircle,
   Settings,
+  UserCircle,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -36,6 +37,13 @@ const NAV = [
     label: 'Templates',
     sub: 'Design your invoice',
     exact: false,
+  },
+  {
+    href: '/profile',
+    icon: UserCircle,
+    label: 'Profile',
+    sub: 'Account & security',
+    exact: true,
   },
 ];
 

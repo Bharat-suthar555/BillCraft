@@ -1,7 +1,7 @@
 'use client';
 
 import { useAuth } from '@/contexts/AuthContext';
-import { FileText, Palette, Smartphone } from 'lucide-react';
+import { Eye, EyeOff, FileText, Palette, Smartphone } from 'lucide-react';
 import { useState } from 'react';
 
 function GoogleIcon() {
@@ -45,27 +45,102 @@ const FEATURES = [
   },
 ];
 
+type Tab = 'signin' | 'signup';
+
 export default function LoginPage() {
-  const { signInWithGoogle } = useAuth();
+  const { signInWithGoogle, signInWithEmail, signUpWithEmail } = useAuth();
+  const [tab, setTab] = useState<Tab>('signin');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const handleSignIn = async () => {
+  // Sign-in fields
+  const [siEmail, setSiEmail] = useState('');
+  const [siPassword, setSiPassword] = useState('');
+  const [siShowPw, setSiShowPw] = useState(false);
+
+  // Sign-up fields
+  const [suName, setSuName] = useState('');
+  const [suEmail, setSuEmail] = useState('');
+  const [suPassword, setSuPassword] = useState('');
+  const [suConfirm, setSuConfirm] = useState('');
+  const [suShowPw, setSuShowPw] = useState(false);
+
+  const switchTab = (t: Tab) => {
+    setTab(t);
+    setError('');
+  };
+
+  const handleGoogle = async () => {
     setError('');
     setLoading(true);
     try {
       await signInWithGoogle();
     } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : 'Sign-in failed';
+      const msg = e instanceof Error ? e.message : '';
       setError(
-        msg.includes('popup-closed')
-          ? 'Sign-in cancelled.'
-          : 'Sign-in failed. Please try again.',
+        msg.includes('popup-closed') ? 'Sign-in cancelled.' : 'Sign-in failed. Please try again.',
       );
     } finally {
       setLoading(false);
     }
   };
+
+  const handleSignIn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    if (!siEmail || !siPassword) {
+      setError('Please fill in all fields.');
+      return;
+    }
+    setLoading(true);
+    try {
+      await signInWithEmail(siEmail, siPassword);
+    } catch (e: unknown) {
+      const code = (e as { code?: string })?.code;
+      if (
+        code === 'auth/invalid-credential' ||
+        code === 'auth/user-not-found' ||
+        code === 'auth/wrong-password'
+      ) {
+        setError('Incorrect email or password.');
+      } else if (code === 'auth/too-many-requests') {
+        setError('Too many attempts. Please try again later.');
+      } else {
+        setError('Sign-in failed. Please try again.');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    if (!suName.trim()) { setError('Please enter your name.'); return; }
+    if (!suEmail) { setError('Please enter your email.'); return; }
+    if (suPassword.length < 6) { setError('Password must be at least 6 characters.'); return; }
+    if (suPassword !== suConfirm) { setError('Passwords do not match.'); return; }
+    setLoading(true);
+    try {
+      await signUpWithEmail(suEmail, suPassword, suName.trim());
+    } catch (e: unknown) {
+      const code = (e as { code?: string })?.code;
+      if (code === 'auth/email-already-in-use') {
+        setError('An account with this email already exists.');
+      } else if (code === 'auth/invalid-email') {
+        setError('Invalid email address.');
+      } else if (code === 'auth/weak-password') {
+        setError('Password is too weak. Choose a stronger one.');
+      } else {
+        setError('Sign-up failed. Please try again.');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const inputCls =
+    'w-full rounded-lg border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring';
 
   return (
     <div className='flex min-h-screen flex-col items-center justify-center bg-background px-4 py-12'>
@@ -78,15 +153,23 @@ export default function LoginPage() {
           <span className='gradient-text text-3xl font-black tracking-tight'>BillCraft</span>
         </div>
 
-        {/* Sign-in card */}
-        <div className='tdc-card space-y-5'>
-          <div className='text-center'>
-            <h2 className='text-base font-semibold text-foreground'>
-              Welcome back
-            </h2>
-            <p className='mt-1 text-xs text-muted-foreground'>
-              Sign in to manage your invoices
-            </p>
+        {/* Card */}
+        <div className='tdc-card space-y-4'>
+          {/* Tab switcher */}
+          <div className='flex gap-1 rounded-lg bg-muted p-1'>
+            {(['signin', 'signup'] as Tab[]).map((t) => (
+              <button
+                key={t}
+                onClick={() => switchTab(t)}
+                className={`flex-1 rounded-md py-1.5 text-xs font-medium transition-colors ${
+                  tab === t
+                    ? 'bg-card text-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                {t === 'signin' ? 'Sign In' : 'Sign Up'}
+              </button>
+            ))}
           </div>
 
           {error && (
@@ -95,17 +178,135 @@ export default function LoginPage() {
             </p>
           )}
 
+          {tab === 'signin' ? (
+            <form onSubmit={handleSignIn} className='space-y-3'>
+              <div>
+                <label className='mb-1 block text-xs font-medium text-foreground'>Email</label>
+                <input
+                  type='email'
+                  value={siEmail}
+                  onChange={(e) => setSiEmail(e.target.value)}
+                  placeholder='you@example.com'
+                  className={inputCls}
+                  autoComplete='email'
+                />
+              </div>
+              <div>
+                <label className='mb-1 block text-xs font-medium text-foreground'>Password</label>
+                <div className='relative'>
+                  <input
+                    type={siShowPw ? 'text' : 'password'}
+                    value={siPassword}
+                    onChange={(e) => setSiPassword(e.target.value)}
+                    placeholder='••••••••'
+                    className={`${inputCls} pr-9`}
+                    autoComplete='current-password'
+                  />
+                  <button
+                    type='button'
+                    onClick={() => setSiShowPw((p) => !p)}
+                    className='absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground'
+                  >
+                    {siShowPw ? <EyeOff size={14} /> : <Eye size={14} />}
+                  </button>
+                </div>
+              </div>
+              <button
+                type='submit'
+                disabled={loading}
+                className='gradient-primary w-full rounded-xl px-4 py-2.5 text-sm font-medium transition-opacity hover:opacity-90 disabled:opacity-60'
+              >
+                {loading ? 'Signing in…' : 'Sign In'}
+              </button>
+            </form>
+          ) : (
+            <form onSubmit={handleSignUp} className='space-y-3'>
+              <div>
+                <label className='mb-1 block text-xs font-medium text-foreground'>Full Name</label>
+                <input
+                  type='text'
+                  value={suName}
+                  onChange={(e) => setSuName(e.target.value)}
+                  placeholder='Your Name'
+                  className={inputCls}
+                  autoComplete='name'
+                />
+              </div>
+              <div>
+                <label className='mb-1 block text-xs font-medium text-foreground'>Email</label>
+                <input
+                  type='email'
+                  value={suEmail}
+                  onChange={(e) => setSuEmail(e.target.value)}
+                  placeholder='you@example.com'
+                  className={inputCls}
+                  autoComplete='email'
+                />
+              </div>
+              <div>
+                <label className='mb-1 block text-xs font-medium text-foreground'>Password</label>
+                <div className='relative'>
+                  <input
+                    type={suShowPw ? 'text' : 'password'}
+                    value={suPassword}
+                    onChange={(e) => setSuPassword(e.target.value)}
+                    placeholder='Min 6 characters'
+                    className={`${inputCls} pr-9`}
+                    autoComplete='new-password'
+                  />
+                  <button
+                    type='button'
+                    onClick={() => setSuShowPw((p) => !p)}
+                    className='absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground'
+                  >
+                    {suShowPw ? <EyeOff size={14} /> : <Eye size={14} />}
+                  </button>
+                </div>
+              </div>
+              <div>
+                <label className='mb-1 block text-xs font-medium text-foreground'>
+                  Confirm Password
+                </label>
+                <input
+                  type='password'
+                  value={suConfirm}
+                  onChange={(e) => setSuConfirm(e.target.value)}
+                  placeholder='••••••••'
+                  className={inputCls}
+                  autoComplete='new-password'
+                />
+              </div>
+              <button
+                type='submit'
+                disabled={loading}
+                className='gradient-primary w-full rounded-xl px-4 py-2.5 text-sm font-medium transition-opacity hover:opacity-90 disabled:opacity-60'
+              >
+                {loading ? 'Creating account…' : 'Create Account'}
+              </button>
+            </form>
+          )}
+
+          {/* Divider */}
+          <div className='relative'>
+            <div className='absolute inset-0 flex items-center'>
+              <div className='w-full border-t border-border' />
+            </div>
+            <div className='relative flex justify-center'>
+              <span className='bg-card px-2 text-[11px] text-muted-foreground'>or</span>
+            </div>
+          </div>
+
           <button
-            onClick={handleSignIn}
+            onClick={handleGoogle}
             disabled={loading}
-            className='flex w-full items-center justify-center gap-3 rounded-xl border border-border bg-card px-4 py-3 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-accent disabled:opacity-60'
+            className='flex w-full items-center justify-center gap-3 rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-accent disabled:opacity-60'
           >
             {loading ? (
               <span className='h-4 w-4 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent' />
             ) : (
               <GoogleIcon />
             )}
-            {loading ? 'Signing in…' : 'Continue with Google'}
+            {loading ? 'Please wait…' : 'Continue with Google'}
           </button>
 
           <p className='text-center text-[11px] text-muted-foreground'>
@@ -113,22 +314,22 @@ export default function LoginPage() {
           </p>
         </div>
 
-        {/* Feature list */}
-        <div className='mt-6 space-y-3'>
-          {FEATURES.map(({ icon: Icon, label, desc }) => (
-            <div key={label} className='flex items-start gap-3'>
-              <div className='mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#1890ff]/10'>
-                <Icon size={14} className='text-[#1890ff]' />
-              </div>
-              <div>
-                <div className='text-xs font-medium text-foreground'>
-                  {label}
+        {/* Feature list — sign-in tab only */}
+        {tab === 'signin' && (
+          <div className='mt-6 space-y-3'>
+            {FEATURES.map(({ icon: Icon, label, desc }) => (
+              <div key={label} className='flex items-start gap-3'>
+                <div className='mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#1890ff]/10'>
+                  <Icon size={14} className='text-[#1890ff]' />
                 </div>
-                <div className='text-[11px] text-muted-foreground'>{desc}</div>
+                <div>
+                  <div className='text-xs font-medium text-foreground'>{label}</div>
+                  <div className='text-[11px] text-muted-foreground'>{desc}</div>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
