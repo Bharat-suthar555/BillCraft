@@ -211,3 +211,26 @@ export async function updateInvoice(
 export async function deleteInvoice(id: string): Promise<void> {
   await remove(ref(db, userPath(`invoices/${id}`)));
 }
+
+// ─── User Preferences ─────────────────────────────────────────────────────────
+
+export interface UserPreferences {
+  theme: 'light' | 'dark' | 'system';
+  currency: string;
+}
+
+const DEFAULT_PREFS: UserPreferences = { theme: 'system', currency: '₹' };
+
+export async function getPreferences(): Promise<UserPreferences> {
+  const snap = await get(ref(db, userPath('preferences')));
+  if (!snap.exists()) return { ...DEFAULT_PREFS };
+  const val = snap.val() as Record<string, unknown>;
+  return {
+    theme: (val.theme as UserPreferences['theme']) ?? DEFAULT_PREFS.theme,
+    currency: (val.currency as string) ?? DEFAULT_PREFS.currency,
+  };
+}
+
+export async function savePreferences(prefs: Partial<UserPreferences>): Promise<void> {
+  await update(ref(db, userPath('preferences')), prefs);
+}

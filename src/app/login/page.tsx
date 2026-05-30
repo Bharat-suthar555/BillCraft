@@ -41,7 +41,7 @@ const FEATURES = [
   {
     icon: Smartphone,
     label: 'Works on all devices',
-    desc: 'Phone, tablet, laptop — install as an app',
+    desc: 'Phone, tablet, laptop — install as app',
   },
 ];
 
@@ -53,12 +53,10 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Sign-in fields
   const [siEmail, setSiEmail] = useState('');
   const [siPassword, setSiPassword] = useState('');
   const [siShowPw, setSiShowPw] = useState(false);
 
-  // Sign-up fields
   const [suName, setSuName] = useState('');
   const [suEmail, setSuEmail] = useState('');
   const [suPassword, setSuPassword] = useState('');
@@ -78,7 +76,9 @@ export default function LoginPage() {
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : '';
       setError(
-        msg.includes('popup-closed') ? 'Sign-in cancelled.' : 'Sign-in failed. Please try again.',
+        msg.includes('popup-closed')
+          ? 'Sign-in cancelled.'
+          : 'Sign-in failed. Please try again.',
       );
     } finally {
       setLoading(false);
@@ -116,54 +116,84 @@ export default function LoginPage() {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    if (!suName.trim()) { setError('Please enter your name.'); return; }
-    if (!suEmail) { setError('Please enter your email.'); return; }
-    if (suPassword.length < 6) { setError('Password must be at least 6 characters.'); return; }
-    if (suPassword !== suConfirm) { setError('Passwords do not match.'); return; }
+    if (!suName.trim()) {
+      setError('Please enter your name.');
+      return;
+    }
+    if (!suEmail) {
+      setError('Please enter your email.');
+      return;
+    }
+    if (suPassword.length < 6) {
+      setError('Password must be at least 6 characters.');
+      return;
+    }
+    if (suPassword !== suConfirm) {
+      setError('Passwords do not match.');
+      return;
+    }
     setLoading(true);
     try {
       await signUpWithEmail(suEmail, suPassword, suName.trim());
     } catch (e: unknown) {
       const code = (e as { code?: string })?.code;
-      if (code === 'auth/email-already-in-use') {
+      if (code === 'auth/email-already-in-use')
         setError('An account with this email already exists.');
-      } else if (code === 'auth/invalid-email') {
+      else if (code === 'auth/invalid-email')
         setError('Invalid email address.');
-      } else if (code === 'auth/weak-password') {
+      else if (code === 'auth/weak-password')
         setError('Password is too weak. Choose a stronger one.');
-      } else if (code === 'auth/operation-not-allowed') {
-        setError('Email/password sign-up is not enabled. Please enable it in Firebase Console → Authentication → Sign-in methods.');
-      } else {
-        setError(`Sign-up failed: ${code ?? 'unknown error'}`);
-      }
+      else if (code === 'auth/operation-not-allowed')
+        setError(
+          'Email sign-up is not enabled. Enable it in Firebase Console.',
+        );
+      else setError(`Sign-up failed: ${code ?? 'unknown error'}`);
     } finally {
       setLoading(false);
     }
   };
 
   const inputCls =
-    'w-full rounded-lg border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring';
+    'w-full rounded-xl border border-input bg-background/70 px-3.5 py-2.5 text-sm placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-transparent transition-all';
 
   return (
-    <div className='flex min-h-screen flex-col items-center justify-center bg-background px-4 py-12'>
-      <div className='w-full max-w-sm'>
+    <div className='relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-4 py-12'>
+      {/* ── Gradient background ─────────────────────────────────── */}
+      <div className='pointer-events-none fixed inset-0 bg-gradient-to-br from-slate-50 via-white to-blue-50/40 dark:from-[#0a0a0f] dark:via-[#0d0d18] dark:to-[#0f0a1a]' />
+
+      {/* ── Animated orbs ──────────────────────────────────────── */}
+      <div className='pointer-events-none fixed inset-0 overflow-hidden'>
+        <div className='auth-orb-1 absolute -left-56 -top-56 h-[650px] w-[650px] rounded-full bg-blue-500/20 blur-3xl dark:bg-blue-600/12' />
+        <div className='auth-orb-2 absolute -bottom-56 -right-56 h-[750px] w-[750px] rounded-full bg-purple-600/20 blur-3xl dark:bg-purple-700/12' />
+        <div className='auth-orb-3 absolute right-1/4 top-1/3 h-[450px] w-[450px] rounded-full bg-indigo-400/12 blur-3xl dark:bg-indigo-500/8' />
+      </div>
+
+      {/* ── Content ────────────────────────────────────────────── */}
+      <div className='relative w-full max-w-sm'>
         {/* Logo */}
-        <div className='mb-8 flex flex-col items-center gap-3'>
-          <div className='gradient-primary flex h-16 w-16 items-center justify-center rounded-2xl text-xl font-black text-white shadow-lg shadow-blue-500/20'>
+        <div className='auth-fade-up mb-8 flex flex-col items-center gap-3'>
+          <div className='auth-logo-glow gradient-primary flex h-16 w-16 items-center justify-center rounded-2xl text-xl font-black text-white'>
             BC
           </div>
-          <span className='gradient-text text-3xl font-black tracking-tight'>BillCraft</span>
+          <div className='text-center'>
+            <div className='gradient-text text-3xl font-black tracking-tight'>
+              BillCraft
+            </div>
+            <p className='mt-0.5 text-xs text-muted-foreground'>
+              Professional Invoice Management
+            </p>
+          </div>
         </div>
 
         {/* Card */}
-        <div className='tdc-card space-y-4'>
+        <div className='auth-fade-up-delay space-y-4 rounded-2xl border border-border/60 bg-card/90 p-5 shadow-2xl shadow-black/10 backdrop-blur-xl dark:border-border/40 dark:bg-card/80'>
           {/* Tab switcher */}
-          <div className='flex gap-1 rounded-lg bg-muted p-1'>
+          <div className='flex gap-1 rounded-xl bg-muted/70 p-1'>
             {(['signin', 'signup'] as Tab[]).map((t) => (
               <button
                 key={t}
                 onClick={() => switchTab(t)}
-                className={`flex-1 rounded-md py-1.5 text-xs font-medium transition-colors ${
+                className={`flex-1 rounded-lg py-2 text-xs font-semibold transition-all duration-200 ${
                   tab === t
                     ? 'bg-card text-foreground shadow-sm'
                     : 'text-muted-foreground hover:text-foreground'
@@ -174,16 +204,20 @@ export default function LoginPage() {
             ))}
           </div>
 
+          {/* Error */}
           {error && (
-            <p className='rounded-lg bg-red-50 px-3 py-2 text-xs text-red-600 dark:bg-red-950/30 dark:text-red-400'>
+            <p className='rounded-xl bg-red-50 px-3.5 py-2.5 text-xs text-red-600 dark:bg-red-950/40 dark:text-red-400'>
               {error}
             </p>
           )}
 
+          {/* Sign In form */}
           {tab === 'signin' ? (
             <form onSubmit={handleSignIn} className='space-y-3'>
-              <div>
-                <label className='mb-1 block text-xs font-medium text-foreground'>Email</label>
+              <div className='space-y-1.5'>
+                <label className='block text-xs font-medium text-foreground/80'>
+                  Email
+                </label>
                 <input
                   type='email'
                   value={siEmail}
@@ -193,21 +227,23 @@ export default function LoginPage() {
                   autoComplete='email'
                 />
               </div>
-              <div>
-                <label className='mb-1 block text-xs font-medium text-foreground'>Password</label>
+              <div className='space-y-1.5'>
+                <label className='block text-xs font-medium text-foreground/80'>
+                  Password
+                </label>
                 <div className='relative'>
                   <input
                     type={siShowPw ? 'text' : 'password'}
                     value={siPassword}
                     onChange={(e) => setSiPassword(e.target.value)}
                     placeholder='••••••••'
-                    className={`${inputCls} pr-9`}
+                    className={`${inputCls} pr-10`}
                     autoComplete='current-password'
                   />
                   <button
                     type='button'
                     onClick={() => setSiShowPw((p) => !p)}
-                    className='absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground'
+                    className='absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground'
                   >
                     {siShowPw ? <EyeOff size={14} /> : <Eye size={14} />}
                   </button>
@@ -216,15 +252,18 @@ export default function LoginPage() {
               <button
                 type='submit'
                 disabled={loading}
-                className='gradient-primary w-full rounded-xl px-4 py-2.5 text-sm font-medium transition-opacity hover:opacity-90 disabled:opacity-60'
+                className='gradient-primary w-full rounded-xl py-2.5 text-sm font-semibold transition-opacity hover:opacity-90 disabled:opacity-60'
               >
                 {loading ? 'Signing in…' : 'Sign In'}
               </button>
             </form>
           ) : (
+            /* Sign Up form */
             <form onSubmit={handleSignUp} className='space-y-3'>
-              <div>
-                <label className='mb-1 block text-xs font-medium text-foreground'>Full Name</label>
+              <div className='space-y-1.5'>
+                <label className='block text-xs font-medium text-foreground/80'>
+                  Full Name
+                </label>
                 <input
                   type='text'
                   value={suName}
@@ -234,8 +273,10 @@ export default function LoginPage() {
                   autoComplete='name'
                 />
               </div>
-              <div>
-                <label className='mb-1 block text-xs font-medium text-foreground'>Email</label>
+              <div className='space-y-1.5'>
+                <label className='block text-xs font-medium text-foreground/80'>
+                  Email
+                </label>
                 <input
                   type='email'
                   value={suEmail}
@@ -245,28 +286,30 @@ export default function LoginPage() {
                   autoComplete='email'
                 />
               </div>
-              <div>
-                <label className='mb-1 block text-xs font-medium text-foreground'>Password</label>
+              <div className='space-y-1.5'>
+                <label className='block text-xs font-medium text-foreground/80'>
+                  Password
+                </label>
                 <div className='relative'>
                   <input
                     type={suShowPw ? 'text' : 'password'}
                     value={suPassword}
                     onChange={(e) => setSuPassword(e.target.value)}
                     placeholder='Min 6 characters'
-                    className={`${inputCls} pr-9`}
+                    className={`${inputCls} pr-10`}
                     autoComplete='new-password'
                   />
                   <button
                     type='button'
                     onClick={() => setSuShowPw((p) => !p)}
-                    className='absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground'
+                    className='absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground'
                   >
                     {suShowPw ? <EyeOff size={14} /> : <Eye size={14} />}
                   </button>
                 </div>
               </div>
-              <div>
-                <label className='mb-1 block text-xs font-medium text-foreground'>
+              <div className='space-y-1.5'>
+                <label className='block text-xs font-medium text-foreground/80'>
                   Confirm Password
                 </label>
                 <input
@@ -281,7 +324,7 @@ export default function LoginPage() {
               <button
                 type='submit'
                 disabled={loading}
-                className='gradient-primary w-full rounded-xl px-4 py-2.5 text-sm font-medium transition-opacity hover:opacity-90 disabled:opacity-60'
+                className='gradient-primary w-full rounded-xl py-2.5 text-sm font-semibold transition-opacity hover:opacity-90 disabled:opacity-60'
               >
                 {loading ? 'Creating account…' : 'Create Account'}
               </button>
@@ -291,17 +334,20 @@ export default function LoginPage() {
           {/* Divider */}
           <div className='relative'>
             <div className='absolute inset-0 flex items-center'>
-              <div className='w-full border-t border-border' />
+              <div className='w-full border-t border-border/60' />
             </div>
             <div className='relative flex justify-center'>
-              <span className='bg-card px-2 text-[11px] text-muted-foreground'>or</span>
+              <span className='bg-card/90 px-3 text-[11px] text-muted-foreground backdrop-blur-sm'>
+                or continue with
+              </span>
             </div>
           </div>
 
+          {/* Google button */}
           <button
             onClick={handleGoogle}
             disabled={loading}
-            className='flex w-full items-center justify-center gap-3 rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-accent disabled:opacity-60'
+            className='flex w-full items-center justify-center gap-3 rounded-xl border border-border/70 bg-background/60 px-4 py-2.5 text-sm font-medium text-foreground shadow-sm backdrop-blur-sm transition-colors hover:bg-accent disabled:opacity-60'
           >
             {loading ? (
               <span className='h-4 w-4 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent' />
@@ -311,22 +357,29 @@ export default function LoginPage() {
             {loading ? 'Please wait…' : 'Continue with Google'}
           </button>
 
-          <p className='text-center text-[11px] text-muted-foreground'>
+          <p className='text-center text-[11px] text-muted-foreground/70'>
             Your data is private and only visible to you.
           </p>
         </div>
 
-        {/* Feature list — sign-in tab only */}
+        {/* Feature list — sign-in only */}
         {tab === 'signin' && (
-          <div className='mt-6 space-y-3'>
+          <div
+            className='auth-fade-up mt-7 space-y-3.5'
+            style={{ animationDelay: '0.2s' }}
+          >
             {FEATURES.map(({ icon: Icon, label, desc }) => (
               <div key={label} className='flex items-start gap-3'>
                 <div className='mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#1890ff]/10'>
                   <Icon size={14} className='text-[#1890ff]' />
                 </div>
                 <div>
-                  <div className='text-xs font-medium text-foreground'>{label}</div>
-                  <div className='text-[11px] text-muted-foreground'>{desc}</div>
+                  <div className='text-xs font-medium text-foreground'>
+                    {label}
+                  </div>
+                  <div className='text-[11px] text-muted-foreground'>
+                    {desc}
+                  </div>
                 </div>
               </div>
             ))}
