@@ -131,8 +131,10 @@ export default function LoginPage() {
         setError('Invalid email address.');
       } else if (code === 'auth/weak-password') {
         setError('Password is too weak. Choose a stronger one.');
+      } else if (code === 'auth/operation-not-allowed') {
+        setError('Email/password sign-up is not enabled. Please enable it in Firebase Console → Authentication → Sign-in methods.');
       } else {
-        setError('Sign-up failed. Please try again.');
+        setError(`Sign-up failed: ${code ?? 'unknown error'}`);
       }
     } finally {
       setLoading(false);

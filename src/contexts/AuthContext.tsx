@@ -6,10 +6,12 @@ import {
   EmailAuthProvider,
   GoogleAuthProvider,
   createUserWithEmailAndPassword,
+  getRedirectResult,
   onAuthStateChanged,
   reauthenticateWithCredential,
   signInWithEmailAndPassword,
   signInWithPopup,
+  signInWithRedirect,
   signOut as fbSignOut,
   updatePassword as fbUpdatePassword,
   updateProfile,
@@ -39,11 +41,24 @@ const AuthContext = createContext<AuthContextType>({
   signOut: async () => {},
 });
 
+// True when running as an installed PWA (iOS "Add to Home Screen" or Android TWA)
+function isPwaStandalone(): boolean {
+  if (typeof window === 'undefined') return false;
+  return (
+    window.matchMedia('(display-mode: standalone)').matches ||
+    (window.navigator as unknown as { standalone?: boolean }).standalone === true
+  );
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Process any pending Google redirect (used in PWA / standalone mode).
+    // Must be called on every app load so Firebase can complete the OAuth flow.
+    getRedirectResult(auth).catch(() => {});
+
     return onAuthStateChanged(auth, (u) => {
       setUser(u);
       setCurrentUser(u?.uid ?? null);
@@ -53,7 +68,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signInWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
-    await signInWithPopup(auth, provider);
+    if (isPwaStandalone()) {
+      // signInWithPopup is broken in iOS standalone / PWA mode — use redirect instead
+      await signInWithRedirect(auth, provider);
+    } else {
+      await signInWithPopup(auth, provider);
+    }
   };
 
   const signInWithEmail = async (email: string, password: string) => {
