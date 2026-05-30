@@ -97,7 +97,7 @@ export function InvoiceForm({
   return (
     <form onSubmit={handleSubmit(onSubmit)} className='space-y-6'>
       {/* Bill details */}
-      <div className='grid grid-cols-2 gap-4'>
+      <div className='grid grid-cols-1 gap-4 sm:grid-cols-2'>
         <div className='space-y-1.5'>
           <Label htmlFor='billNo'>Bill No</Label>
           <Input id='billNo' placeholder='INV-001' {...register('billNo')} />

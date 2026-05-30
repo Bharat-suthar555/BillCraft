@@ -16,9 +16,9 @@ import { toast } from 'sonner';
 const DEMO_INVOICE = {
   billNo: 'INV-001',
   date: new Date().toISOString().split('T')[0],
-  customerName: 'Ramesh Kumar',
-  customerPhone: '+91 98765 43210',
-  customerAddress: '45 Park Avenue, Jaipur',
+  customerName: 'Bharat Kumar',
+  customerPhone: '+91 8094325459',
+  customerAddress: 'Rampura Colony, Jalore',
   lineItems: [
     {
       ...EMPTY_LINE_ITEM(),

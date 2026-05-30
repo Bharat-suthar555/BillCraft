@@ -27,6 +27,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang='en' suppressHydrationWarning>
+      <head>
+        {/* Polyfill: some bundled libs call Image() without `new` — this allows both */}
+        <script dangerouslySetInnerHTML={{ __html: `try{var _I=window.Image;window.Image=function(){return new _I(...arguments)};Object.assign(window.Image,_I);window.Image.prototype=_I.prototype}catch(e){}` }} />
+      </head>
       <body className={geist.className}>
         <ThemeProvider attribute='class' defaultTheme='light' enableSystem>
           <AuthProvider>
