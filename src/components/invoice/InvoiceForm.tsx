@@ -97,12 +97,12 @@ export function InvoiceForm({
   return (
     <form onSubmit={handleSubmit(onSubmit)} className='space-y-6'>
       {/* Bill details */}
-      <div className='grid grid-cols-1 gap-4 sm:grid-cols-2'>
-        <div className='space-y-1.5'>
+      <div className='grid grid-cols-2 gap-3'>
+        <div className='space-y-1.5 min-w-0'>
           <Label htmlFor='billNo'>Bill No</Label>
           <Input id='billNo' placeholder='INV-001' {...register('billNo')} />
         </div>
-        <div className='space-y-1.5'>
+        <div className='space-y-1.5 min-w-0'>
           <Label htmlFor='date'>Date</Label>
           <Input id='date' type='date' {...register('date')} />
         </div>
