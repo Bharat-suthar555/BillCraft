@@ -10,6 +10,7 @@ import {
   PenTool,
   PlusCircle,
   Settings,
+  Shield,
   UserCircle,
 } from 'lucide-react';
 import Link from 'next/link';
@@ -114,6 +115,30 @@ export function Sidebar() {
             </Link>
           );
         })}
+
+        {/* Admin link — only for admin@billcraft.com */}
+        {user?.email === 'admin@billcraft.com' && (
+          <Link
+            href='/admin'
+            title={collapsed ? 'Admin Panel' : undefined}
+            className={cn(
+              'group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors',
+              isActive('/admin', true)
+                ? 'bg-violet-500/10 text-violet-600 font-medium'
+                : 'text-muted-foreground hover:bg-accent hover:text-foreground',
+            )}
+          >
+            <Shield size={18} className='shrink-0' />
+            {!collapsed && (
+              <div className='overflow-hidden'>
+                <div className='truncate font-medium leading-none'>Admin Panel</div>
+                <div className='mt-0.5 truncate text-xs text-muted-foreground leading-none'>
+                  Manage users
+                </div>
+              </div>
+            )}
+          </Link>
+        )}
       </nav>
 
       {/* ── User + Settings + Collapse ───────────────────── */}
