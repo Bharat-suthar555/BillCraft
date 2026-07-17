@@ -40,9 +40,10 @@ export default function InvoicesPage() {
   useEffect(() => {
     getInvoices()
       .then(setInvoices)
-      .catch(() =>
-        toast.error('Failed to load invoices. Check Firebase config.'),
-      )
+      .catch((err) => {
+        console.error('Failed to load invoices:', err);
+        toast.error('Failed to load invoices. Check Firebase config.');
+      })
       .finally(() => setLoading(false));
   }, []);
 
