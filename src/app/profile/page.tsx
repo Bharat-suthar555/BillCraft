@@ -19,33 +19,47 @@ type ThemeVal = 'light' | 'dark' | 'system';
 
 const CURRENCY_PRESETS = ['₹', '$', '€', '£', '¥'];
 
-const THEME_OPTIONS: { value: ThemeVal; label: string; icon: React.ElementType }[] = [
-  { value: 'light',  label: 'Light',  icon: Sun     },
-  { value: 'dark',   label: 'Dark',   icon: Moon    },
+const THEME_OPTIONS: {
+  value: ThemeVal;
+  label: string;
+  icon: React.ElementType;
+}[] = [
+  { value: 'light', label: 'Light', icon: Sun },
+  { value: 'dark', label: 'Dark', icon: Moon },
   { value: 'system', label: 'System', icon: Monitor },
 ];
 
 export default function ProfilePage() {
-  const { user, updateUserDisplayName, updateUserPassword, signOut } = useAuth();
+  const { user, updateUserDisplayName, updateUserPassword, signOut } =
+    useAuth();
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
   /* ── display name ──────────────────────────────────────── */
   const [displayName, setDisplayName] = useState(user?.displayName ?? '');
   const [nameLoading, setNameLoading] = useState(false);
-  const [nameMsg, setNameMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [nameMsg, setNameMsg] = useState<{
+    type: 'success' | 'error';
+    text: string;
+  } | null>(null);
 
   /* ── password ──────────────────────────────────────────── */
   const [currentPw, setCurrentPw] = useState('');
-  const [newPw,     setNewPw]     = useState('');
+  const [newPw, setNewPw] = useState('');
   const [confirmPw, setConfirmPw] = useState('');
   const [pwLoading, setPwLoading] = useState(false);
-  const [pwMsg,     setPwMsg]     = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [pwMsg, setPwMsg] = useState<{
+    type: 'success' | 'error';
+    text: string;
+  } | null>(null);
 
   /* ── preferences ───────────────────────────────────────── */
-  const [currency,    setCurrency]    = useState('₹');
+  const [currency, setCurrency] = useState('₹');
   const [prefLoading, setPrefLoading] = useState(false);
-  const [prefMsg,     setPrefMsg]     = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [prefMsg, setPrefMsg] = useState<{
+    type: 'success' | 'error';
+    text: string;
+  } | null>(null);
 
   /* ── sign-out ──────────────────────────────────────────── */
   const [soLoading, setSoLoading] = useState(false);
@@ -57,46 +71,82 @@ export default function ProfilePage() {
       .catch(() => {});
   }, []);
 
-  const isEmailUser = user?.providerData.some((p) => p.providerId === 'password') ?? false;
+  const isEmailUser =
+    user?.providerData.some((p) => p.providerId === 'password') ?? false;
 
   const initials = user?.displayName
-    ? user.displayName.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()
+    ? user.displayName
+        .split(' ')
+        .map((n) => n[0])
+        .join('')
+        .slice(0, 2)
+        .toUpperCase()
     : '?';
 
   /* ── handlers ──────────────────────────────────────────── */
   const handleNameSave = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setNameMsg(null);
-    if (!displayName.trim()) { setNameMsg({ type: 'error', text: 'Name cannot be empty.' }); return; }
+    if (!displayName.trim()) {
+      setNameMsg({ type: 'error', text: 'Name cannot be empty.' });
+      return;
+    }
     setNameLoading(true);
     try {
       await updateUserDisplayName(displayName.trim());
       setNameMsg({ type: 'success', text: 'Name updated successfully.' });
     } catch {
-      setNameMsg({ type: 'error', text: 'Failed to update name. Please try again.' });
-    } finally { setNameLoading(false); }
+      setNameMsg({
+        type: 'error',
+        text: 'Failed to update name. Please try again.',
+      });
+    } finally {
+      setNameLoading(false);
+    }
   };
 
   const handlePasswordSave = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setPwMsg(null);
-    if (!currentPw)            { setPwMsg({ type: 'error', text: 'Enter your current password.' }); return; }
-    if (newPw.length < 6)      { setPwMsg({ type: 'error', text: 'New password must be at least 6 characters.' }); return; }
-    if (newPw !== confirmPw)   { setPwMsg({ type: 'error', text: 'Passwords do not match.' }); return; }
+    if (!currentPw) {
+      setPwMsg({ type: 'error', text: 'Enter your current password.' });
+      return;
+    }
+    if (newPw.length < 6) {
+      setPwMsg({
+        type: 'error',
+        text: 'New password must be at least 6 characters.',
+      });
+      return;
+    }
+    if (newPw !== confirmPw) {
+      setPwMsg({ type: 'error', text: 'Passwords do not match.' });
+      return;
+    }
     setPwLoading(true);
     try {
       await updateUserPassword(currentPw, newPw);
       setPwMsg({ type: 'success', text: 'Password updated successfully.' });
-      setCurrentPw(''); setNewPw(''); setConfirmPw('');
+      setCurrentPw('');
+      setNewPw('');
+      setConfirmPw('');
     } catch (e: unknown) {
       const code = (e as { code?: string })?.code;
       if (code === 'auth/wrong-password' || code === 'auth/invalid-credential')
         setPwMsg({ type: 'error', text: 'Current password is incorrect.' });
       else if (code === 'auth/too-many-requests')
-        setPwMsg({ type: 'error', text: 'Too many attempts. Please try again later.' });
+        setPwMsg({
+          type: 'error',
+          text: 'Too many attempts. Please try again later.',
+        });
       else
-        setPwMsg({ type: 'error', text: 'Failed to update password. Please try again.' });
-    } finally { setPwLoading(false); }
+        setPwMsg({
+          type: 'error',
+          text: 'Failed to update password. Please try again.',
+        });
+    } finally {
+      setPwLoading(false);
+    }
   };
 
   const handlePrefSave = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -108,7 +158,9 @@ export default function ProfilePage() {
       setPrefMsg({ type: 'success', text: 'Preferences saved.' });
     } catch {
       setPrefMsg({ type: 'error', text: 'Failed to save preferences.' });
-    } finally { setPrefLoading(false); }
+    } finally {
+      setPrefLoading(false);
+    }
   };
 
   const handleSignOut = async () => {
@@ -129,41 +181,43 @@ export default function ProfilePage() {
         : 'bg-red-50 text-red-600 dark:bg-red-950/30 dark:text-red-400'
     }`;
 
-  const sectionCard = 'overflow-hidden rounded-2xl border border-border bg-card shadow-sm';
-  const sectionHeader = 'flex items-center gap-2.5 border-b border-border px-5 py-3.5';
+  const sectionCard =
+    'overflow-hidden rounded-2xl border border-border bg-card shadow-sm';
+  const sectionHeader =
+    'flex items-center gap-2.5 border-b border-border px-5 py-3.5';
   const sectionBody = 'space-y-4 px-5 py-4';
 
   return (
     <div className='mx-auto max-w-lg space-y-5'>
-
       {/* ── Page title ───────────────────────────────────── */}
       <div>
         <h1 className='text-xl font-bold text-foreground'>Profile</h1>
-        <p className='text-sm text-muted-foreground'>Manage your account, preferences and security</p>
+        <p className='text-sm text-muted-foreground'>
+          Manage your account, preferences and security
+        </p>
       </div>
 
       {/* ── User hero card ───────────────────────────────── */}
-      <div className={`${sectionCard} overflow-hidden`}>
-        <div className='gradient-primary relative h-24' />
-        <div className='px-5 pb-5 pt-0'>
-          <div className='-mt-10 mb-3'>
-            {user.photoURL ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={user.photoURL}
-                alt={user.displayName ?? 'User'}
-                className='h-20 w-20 rounded-2xl object-cover ring-4 ring-card shadow-lg'
-              />
-            ) : (
-              <div className='gradient-primary flex h-20 w-20 items-center justify-center rounded-2xl text-2xl font-bold text-white ring-4 ring-card shadow-lg'>
-                {initials}
-              </div>
-            )}
+      <div className={`${sectionCard} flex items-center gap-4 p-5`}>
+        {user.photoURL ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={user.photoURL}
+            alt={user.displayName ?? 'User'}
+            className='h-16 w-16 shrink-0 rounded-2xl object-cover shadow-sm'
+          />
+        ) : (
+          <div className='gradient-primary flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl text-xl font-bold text-white shadow-sm'>
+            {initials}
           </div>
-          <div className='font-bold text-foreground text-lg leading-tight'>
+        )}
+        <div className='min-w-0'>
+          <div className='truncate text-lg font-bold leading-tight text-foreground'>
             {user.displayName ?? 'User'}
           </div>
-          <div className='text-sm text-muted-foreground mt-0.5'>{user.email}</div>
+          <div className='mt-0.5 truncate text-sm text-muted-foreground'>
+            {user.email}
+          </div>
           <span className='mt-2 inline-flex items-center rounded-full bg-muted px-2.5 py-0.5 text-[10px] font-medium text-muted-foreground'>
             {isEmailUser ? 'Email / Password' : 'Google Account'}
           </span>
@@ -176,23 +230,47 @@ export default function ProfilePage() {
           <div className='flex h-7 w-7 items-center justify-center rounded-lg bg-blue-500/10'>
             <UserCircle size={15} className='text-blue-500' />
           </div>
-          <h2 className='text-sm font-semibold text-foreground'>Account Details</h2>
+          <h2 className='text-sm font-semibold text-foreground'>
+            Account Details
+          </h2>
         </div>
         <div className={sectionBody}>
           <form onSubmit={handleNameSave} className='space-y-3'>
             <div className='space-y-1.5'>
-              <label className='block text-xs font-medium text-foreground/80'>Display Name</label>
-              <input type='text' value={displayName} onChange={e => setDisplayName(e.target.value)}
-                placeholder='Your name' className={inputCls} autoComplete='name' />
+              <label className='block text-xs font-medium text-foreground/80'>
+                Display Name
+              </label>
+              <input
+                type='text'
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                placeholder='Your name'
+                className={inputCls}
+                autoComplete='name'
+              />
             </div>
             <div className='space-y-1.5'>
-              <label className='block text-xs font-medium text-foreground/80'>Email</label>
-              <input type='email' value={user.email ?? ''} disabled
-                className='w-full rounded-xl border border-input bg-muted/60 px-3.5 py-2.5 text-sm text-muted-foreground' />
+              <label className='block text-xs font-medium text-foreground/80'>
+                Email
+              </label>
+              <input
+                type='email'
+                value={user.email ?? ''}
+                disabled
+                className='w-full rounded-xl border border-input bg-muted/60 px-3.5 py-2.5 text-sm text-muted-foreground'
+              />
             </div>
-            {nameMsg && <p className={msgCls(nameMsg.type)}>{nameMsg.type === 'success' && <CheckCircle size={12} />}{nameMsg.text}</p>}
-            <button type='submit' disabled={nameLoading}
-              className='gradient-primary rounded-xl px-5 py-2 text-sm font-semibold transition-opacity hover:opacity-90 disabled:opacity-60'>
+            {nameMsg && (
+              <p className={msgCls(nameMsg.type)}>
+                {nameMsg.type === 'success' && <CheckCircle size={12} />}
+                {nameMsg.text}
+              </p>
+            )}
+            <button
+              type='submit'
+              disabled={nameLoading}
+              className='gradient-primary rounded-xl px-5 py-2 text-sm font-semibold transition-opacity hover:opacity-90 disabled:opacity-60'
+            >
               {nameLoading ? 'Saving…' : 'Save Name'}
             </button>
           </form>
@@ -208,10 +286,11 @@ export default function ProfilePage() {
           <h2 className='text-sm font-semibold text-foreground'>Preferences</h2>
         </div>
         <div className={sectionBody}>
-
           {/* Theme */}
           <div className='space-y-2'>
-            <label className='block text-xs font-medium text-foreground/80'>Appearance</label>
+            <label className='block text-xs font-medium text-foreground/80'>
+              Appearance
+            </label>
             {mounted ? (
               <div className='grid grid-cols-3 gap-2'>
                 {THEME_OPTIONS.map(({ value, label, icon: Icon }) => (
@@ -232,8 +311,11 @@ export default function ProfilePage() {
               </div>
             ) : (
               <div className='grid grid-cols-3 gap-2'>
-                {[0, 1, 2].map(i => (
-                  <div key={i} className='h-17 animate-pulse rounded-xl bg-muted' />
+                {[0, 1, 2].map((i) => (
+                  <div
+                    key={i}
+                    className='h-17 animate-pulse rounded-xl bg-muted'
+                  />
                 ))}
               </div>
             )}
@@ -242,7 +324,9 @@ export default function ProfilePage() {
           {/* Currency */}
           <form onSubmit={handlePrefSave} className='space-y-3'>
             <div className='space-y-2'>
-              <label className='block text-xs font-medium text-foreground/80'>Default Currency Symbol</label>
+              <label className='block text-xs font-medium text-foreground/80'>
+                Default Currency Symbol
+              </label>
               <div className='flex flex-wrap gap-2'>
                 {CURRENCY_PRESETS.map((c) => (
                   <button
@@ -261,16 +345,24 @@ export default function ProfilePage() {
                 <input
                   type='text'
                   value={currency}
-                  onChange={e => setCurrency(e.target.value)}
+                  onChange={(e) => setCurrency(e.target.value)}
                   placeholder='Custom'
                   maxLength={4}
                   className='w-20 rounded-lg border border-input bg-background px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50'
                 />
               </div>
             </div>
-            {prefMsg && <p className={msgCls(prefMsg.type)}>{prefMsg.type === 'success' && <CheckCircle size={12} />}{prefMsg.text}</p>}
-            <button type='submit' disabled={prefLoading}
-              className='gradient-primary rounded-xl px-5 py-2 text-sm font-semibold transition-opacity hover:opacity-90 disabled:opacity-60'>
+            {prefMsg && (
+              <p className={msgCls(prefMsg.type)}>
+                {prefMsg.type === 'success' && <CheckCircle size={12} />}
+                {prefMsg.text}
+              </p>
+            )}
+            <button
+              type='submit'
+              disabled={prefLoading}
+              className='gradient-primary rounded-xl px-5 py-2 text-sm font-semibold transition-opacity hover:opacity-90 disabled:opacity-60'
+            >
               {prefLoading ? 'Saving…' : 'Save Preferences'}
             </button>
           </form>
@@ -289,33 +381,70 @@ export default function ProfilePage() {
           {isEmailUser ? (
             <form onSubmit={handlePasswordSave} className='space-y-3'>
               <div className='space-y-1.5'>
-                <label className='block text-xs font-medium text-foreground/80'>Current Password</label>
-                <input type='password' value={currentPw} onChange={e => setCurrentPw(e.target.value)}
-                  placeholder='••••••••' className={inputCls} autoComplete='current-password' />
+                <label className='block text-xs font-medium text-foreground/80'>
+                  Current Password
+                </label>
+                <input
+                  type='password'
+                  value={currentPw}
+                  onChange={(e) => setCurrentPw(e.target.value)}
+                  placeholder='••••••••'
+                  className={inputCls}
+                  autoComplete='current-password'
+                />
               </div>
               <div className='space-y-1.5'>
-                <label className='block text-xs font-medium text-foreground/80'>New Password</label>
-                <input type='password' value={newPw} onChange={e => setNewPw(e.target.value)}
-                  placeholder='Min 6 characters' className={inputCls} autoComplete='new-password' />
+                <label className='block text-xs font-medium text-foreground/80'>
+                  New Password
+                </label>
+                <input
+                  type='password'
+                  value={newPw}
+                  onChange={(e) => setNewPw(e.target.value)}
+                  placeholder='Min 6 characters'
+                  className={inputCls}
+                  autoComplete='new-password'
+                />
               </div>
               <div className='space-y-1.5'>
-                <label className='block text-xs font-medium text-foreground/80'>Confirm New Password</label>
-                <input type='password' value={confirmPw} onChange={e => setConfirmPw(e.target.value)}
-                  placeholder='••••••••' className={inputCls} autoComplete='new-password' />
+                <label className='block text-xs font-medium text-foreground/80'>
+                  Confirm New Password
+                </label>
+                <input
+                  type='password'
+                  value={confirmPw}
+                  onChange={(e) => setConfirmPw(e.target.value)}
+                  placeholder='••••••••'
+                  className={inputCls}
+                  autoComplete='new-password'
+                />
               </div>
-              {pwMsg && <p className={msgCls(pwMsg.type)}>{pwMsg.type === 'success' && <CheckCircle size={12} />}{pwMsg.text}</p>}
-              <button type='submit' disabled={pwLoading}
-                className='gradient-primary rounded-xl px-5 py-2 text-sm font-semibold transition-opacity hover:opacity-90 disabled:opacity-60'>
+              {pwMsg && (
+                <p className={msgCls(pwMsg.type)}>
+                  {pwMsg.type === 'success' && <CheckCircle size={12} />}
+                  {pwMsg.text}
+                </p>
+              )}
+              <button
+                type='submit'
+                disabled={pwLoading}
+                className='gradient-primary rounded-xl px-5 py-2 text-sm font-semibold transition-opacity hover:opacity-90 disabled:opacity-60'
+              >
                 {pwLoading ? 'Updating…' : 'Update Password'}
               </button>
             </form>
           ) : (
             <p className='rounded-xl bg-muted/60 px-4 py-3 text-xs text-muted-foreground'>
               You signed in with Google. To change your password, visit your{' '}
-              <a href='https://myaccount.google.com/security' target='_blank' rel='noreferrer'
-                className='font-medium underline hover:text-foreground'>
+              <a
+                href='https://myaccount.google.com/security'
+                target='_blank'
+                rel='noreferrer'
+                className='font-medium underline hover:text-foreground'
+              >
                 Google Account settings
-              </a>.
+              </a>
+              .
             </p>
           )}
         </div>
@@ -343,7 +472,6 @@ export default function ProfilePage() {
           </button>
         </div>
       </div>
-
     </div>
   );
 }
