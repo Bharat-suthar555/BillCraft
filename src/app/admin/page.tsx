@@ -2,6 +2,8 @@
 
 import { useAuth } from '@/contexts/AuthContext';
 import { auth } from '@/lib/firebase';
+import { setImpersonation } from '@/lib/impersonation';
+import { signInWithCustomToken } from 'firebase/auth';
 import {
   AlertTriangle,
   Ban,
@@ -13,6 +15,7 @@ import {
   Shield,
   Trash2,
   UserCheck,
+  UserCog,
   Users,
 } from 'lucide-react';
 import Link from 'next/link';
@@ -22,15 +25,15 @@ import { useEffect, useMemo, useState } from 'react';
 const ADMIN_EMAIL = 'tdc.bharat@gmail.com';
 
 interface AdminUser {
-  uid:           string;
-  email:         string;
-  displayName:   string;
-  photoURL:      string | null;
-  disabled:      boolean;
+  uid: string;
+  email: string;
+  displayName: string;
+  photoURL: string | null;
+  disabled: boolean;
   emailVerified: boolean;
-  createdAt:     string;
-  lastSignIn:    string;
-  providers:     string[];
+  createdAt: string;
+  lastSignIn: string;
+  providers: string[];
 }
 
 async function adminFetch(path: string, options: RequestInit = {}) {
@@ -58,7 +61,9 @@ function StatCard({
 }) {
   return (
     <div className='tdc-card flex items-center gap-3'>
-      <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${color}`}>
+      <div
+        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${color}`}
+      >
         <Icon size={18} className='text-white' />
       </div>
       <div>
@@ -87,10 +92,10 @@ export default function AdminPage() {
   const { user } = useAuth();
   const router = useRouter();
 
-  const [users,    setUsers]    = useState<AdminUser[]>([]);
-  const [loading,  setLoading]  = useState(true);
-  const [error,    setError]    = useState('');
-  const [search,   setSearch]   = useState('');
+  const [users, setUsers] = useState<AdminUser[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [search, setSearch] = useState('');
   const [actionUid, setActionUid] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
 
@@ -105,8 +110,13 @@ export default function AdminPage() {
     try {
       const res = await adminFetch('/api/admin/users');
       if (!res.ok) throw new Error(await res.text());
-      const data = await res.json() as { users: AdminUser[] };
-      setUsers(data.users.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
+      const data = (await res.json()) as { users: AdminUser[] };
+      setUsers(
+        data.users.sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+        ),
+      );
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Failed to load users');
     } finally {
@@ -138,10 +148,44 @@ export default function AdminPage() {
       });
       if (!res.ok) throw new Error();
       setUsers((prev) =>
-        prev.map((x) => (x.uid === u.uid ? { ...x, disabled: !u.disabled } : x)),
+        prev.map((x) =>
+          x.uid === u.uid ? { ...x, disabled: !u.disabled } : x,
+        ),
       );
     } catch {
       setError('Action failed. Please try again.');
+    } finally {
+      setActionUid(null);
+    }
+  };
+
+  const handleImpersonate = async (u: AdminUser) => {
+    if (
+      !confirm(
+        `Impersonate ${u.email}? You'll be signed in as this user until you return to admin.`,
+      )
+    )
+      return;
+    setActionUid(u.uid);
+    try {
+      const res = await adminFetch(`/api/admin/users/${u.uid}/impersonate`, {
+        method: 'POST',
+      });
+      if (!res.ok) throw new Error(await res.text());
+      const data = (await res.json()) as {
+        targetToken: string;
+        adminReturnToken: string;
+        targetEmail: string;
+      };
+      setImpersonation({
+        adminReturnToken: data.adminReturnToken,
+        targetEmail: data.targetEmail,
+        targetUid: u.uid,
+      });
+      await signInWithCustomToken(auth, data.targetToken);
+      router.push('/invoices');
+    } catch {
+      setError('Failed to impersonate user.');
     } finally {
       setActionUid(null);
     }
@@ -151,7 +195,9 @@ export default function AdminPage() {
     setConfirmDelete(null);
     setActionUid(uid);
     try {
-      const res = await adminFetch(`/api/admin/users/${uid}`, { method: 'DELETE' });
+      const res = await adminFetch(`/api/admin/users/${uid}`, {
+        method: 'DELETE',
+      });
       if (!res.ok) throw new Error();
       setUsers((prev) => prev.filter((u) => u.uid !== uid));
     } catch {
@@ -161,21 +207,29 @@ export default function AdminPage() {
     }
   };
 
-  const stats = useMemo(() => ({
-    total:    users.length,
-    active:   users.filter((u) => !u.disabled).length,
-    email:    users.filter((u) => u.providers.includes('password')).length,
-    google:   users.filter((u) => u.providers.includes('google.com')).length,
-  }), [users]);
+  const stats = useMemo(
+    () => ({
+      total: users.length,
+      active: users.filter((u) => !u.disabled).length,
+      email: users.filter((u) => u.providers.includes('password')).length,
+      google: users.filter((u) => u.providers.includes('google.com')).length,
+    }),
+    [users],
+  );
 
   const fmt = (d: string) =>
-    d ? new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: '2-digit' }) : '—';
+    d
+      ? new Date(d).toLocaleDateString('en-IN', {
+          day: '2-digit',
+          month: 'short',
+          year: '2-digit',
+        })
+      : '—';
 
   if (user?.email !== ADMIN_EMAIL) return null;
 
   return (
     <div className='tdc-container'>
-
       {/* ── Header ─────────────────────────────────────────── */}
       <div className='flex items-center justify-between'>
         <div>
@@ -185,7 +239,9 @@ export default function AdminPage() {
             </div>
             <h1 className='text-xl font-bold text-foreground'>Admin Panel</h1>
           </div>
-          <p className='mt-0.5 text-sm text-muted-foreground'>Manage all registered users</p>
+          <p className='mt-0.5 text-sm text-muted-foreground'>
+            Manage all registered users
+          </p>
         </div>
         <button
           onClick={fetchUsers}
@@ -199,10 +255,30 @@ export default function AdminPage() {
 
       {/* ── Stats ──────────────────────────────────────────── */}
       <div className='grid grid-cols-2 gap-3 sm:grid-cols-4'>
-        <StatCard icon={Users}     label='Total Users'  value={stats.total}  color='bg-gradient-to-br from-blue-500 to-blue-600'   />
-        <StatCard icon={UserCheck} label='Active'       value={stats.active} color='bg-gradient-to-br from-green-500 to-green-600'  />
-        <StatCard icon={Mail}      label='Email / PW'   value={stats.email}  color='bg-gradient-to-br from-orange-500 to-orange-600' />
-        <StatCard icon={CheckCircle2} label='Google'    value={stats.google} color='bg-gradient-to-br from-violet-500 to-violet-600' />
+        <StatCard
+          icon={Users}
+          label='Total Users'
+          value={stats.total}
+          color='bg-gradient-to-br from-blue-500 to-blue-600'
+        />
+        <StatCard
+          icon={UserCheck}
+          label='Active'
+          value={stats.active}
+          color='bg-gradient-to-br from-green-500 to-green-600'
+        />
+        <StatCard
+          icon={Mail}
+          label='Email / PW'
+          value={stats.email}
+          color='bg-gradient-to-br from-orange-500 to-orange-600'
+        />
+        <StatCard
+          icon={CheckCircle2}
+          label='Google'
+          value={stats.google}
+          color='bg-gradient-to-br from-violet-500 to-violet-600'
+        />
       </div>
 
       {/* ── Error ──────────────────────────────────────────── */}
@@ -210,14 +286,22 @@ export default function AdminPage() {
         <div className='flex items-center gap-2 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600 dark:bg-red-950/30 dark:text-red-400'>
           <AlertTriangle size={14} />
           {error}
-          <button onClick={() => setError('')} className='ml-auto text-xs underline'>Dismiss</button>
+          <button
+            onClick={() => setError('')}
+            className='ml-auto text-xs underline'
+          >
+            Dismiss
+          </button>
         </div>
       )}
 
       {/* ── Search ─────────────────────────────────────────── */}
       <div className='tdc-card py-3'>
         <div className='relative'>
-          <Search size={14} className='absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground' />
+          <Search
+            size={14}
+            className='absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground'
+          />
           <input
             type='text'
             placeholder='Search by name, email or UID…'
@@ -263,21 +347,33 @@ export default function AdminPage() {
                 </thead>
                 <tbody className='divide-y divide-border'>
                   {filtered.map((u) => {
-                    const isAdmin    = u.email === ADMIN_EMAIL;
-                    const isSelf     = u.uid === auth.currentUser?.uid;
-                    const busy       = actionUid === u.uid;
-                    const initials   = u.displayName
-                      ? u.displayName.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()
+                    const isAdmin = u.email === ADMIN_EMAIL;
+                    const isSelf = u.uid === auth.currentUser?.uid;
+                    const busy = actionUid === u.uid;
+                    const initials = u.displayName
+                      ? u.displayName
+                          .split(' ')
+                          .map((n) => n[0])
+                          .join('')
+                          .slice(0, 2)
+                          .toUpperCase()
                       : u.email[0].toUpperCase();
 
                     return (
-                      <tr key={u.uid} className={`transition-colors hover:bg-muted/30 ${u.disabled ? 'opacity-60' : ''}`}>
+                      <tr
+                        key={u.uid}
+                        className={`transition-colors hover:bg-muted/30 ${u.disabled ? 'opacity-60' : ''}`}
+                      >
                         {/* User */}
                         <td className='px-4 py-3'>
                           <div className='flex items-center gap-3'>
                             {u.photoURL ? (
                               // eslint-disable-next-line @next/next/no-img-element
-                              <img src={u.photoURL} alt='' className='h-9 w-9 rounded-full object-cover' />
+                              <img
+                                src={u.photoURL}
+                                alt=''
+                                className='h-9 w-9 rounded-full object-cover'
+                              />
                             ) : (
                               <div className='gradient-primary flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white'>
                                 {initials}
@@ -292,21 +388,29 @@ export default function AdminPage() {
                                   </span>
                                 )}
                               </div>
-                              <div className='truncate text-xs text-muted-foreground'>{u.email}</div>
+                              <div className='truncate text-xs text-muted-foreground'>
+                                {u.email}
+                              </div>
                             </div>
                           </div>
                         </td>
 
                         {/* Provider */}
                         <td className='px-4 py-3'>
-                          {u.providers.map((p) => <ProviderBadge key={p} provider={p} />)}
+                          {u.providers.map((p) => (
+                            <ProviderBadge key={p} provider={p} />
+                          ))}
                         </td>
 
                         {/* Joined */}
-                        <td className='px-4 py-3 text-xs text-muted-foreground'>{fmt(u.createdAt)}</td>
+                        <td className='px-4 py-3 text-xs text-muted-foreground'>
+                          {fmt(u.createdAt)}
+                        </td>
 
                         {/* Last sign-in */}
-                        <td className='px-4 py-3 text-xs text-muted-foreground'>{fmt(u.lastSignIn)}</td>
+                        <td className='px-4 py-3 text-xs text-muted-foreground'>
+                          {fmt(u.lastSignIn)}
+                        </td>
 
                         {/* Status */}
                         <td className='px-4 py-3'>
@@ -335,12 +439,26 @@ export default function AdminPage() {
                               </Link>
                             )}
 
+                            {/* Impersonate */}
+                            {!isAdmin && !isSelf && (
+                              <button
+                                onClick={() => handleImpersonate(u)}
+                                disabled={busy}
+                                title={`Impersonate ${u.email}`}
+                                className='rounded-lg border border-amber-200 bg-amber-50 p-1.5 text-amber-600 hover:bg-amber-100 disabled:opacity-50 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-400 dark:hover:bg-amber-950/50'
+                              >
+                                <UserCog size={13} />
+                              </button>
+                            )}
+
                             {/* Disable / Enable */}
                             {!isAdmin && !isSelf && (
                               <button
                                 onClick={() => handleToggleDisable(u)}
                                 disabled={busy}
-                                title={u.disabled ? 'Enable user' : 'Disable user'}
+                                title={
+                                  u.disabled ? 'Enable user' : 'Disable user'
+                                }
                                 className={`rounded-lg border px-2.5 py-1 text-xs font-medium transition-colors disabled:opacity-50 ${
                                   u.disabled
                                     ? 'border-green-200 bg-green-50 text-green-700 hover:bg-green-100 dark:border-green-900 dark:bg-green-950/30 dark:text-green-400'
@@ -352,8 +470,9 @@ export default function AdminPage() {
                             )}
 
                             {/* Delete */}
-                            {!isAdmin && !isSelf && (
-                              confirmDelete === u.uid ? (
+                            {!isAdmin &&
+                              !isSelf &&
+                              (confirmDelete === u.uid ? (
                                 <div className='flex items-center gap-1'>
                                   <button
                                     onClick={() => handleDelete(u.uid)}
@@ -377,11 +496,12 @@ export default function AdminPage() {
                                 >
                                   <Trash2 size={13} />
                                 </button>
-                              )
-                            )}
+                              ))}
 
                             {isSelf && (
-                              <span className='text-xs text-muted-foreground/50'>—</span>
+                              <span className='text-xs text-muted-foreground/50'>
+                                —
+                              </span>
                             )}
                           </div>
                         </td>
@@ -395,20 +515,32 @@ export default function AdminPage() {
             {/* Mobile cards */}
             <div className='divide-y divide-border sm:hidden'>
               {filtered.map((u) => {
-                const isAdmin  = u.email === ADMIN_EMAIL;
-                const isSelf   = u.uid === auth.currentUser?.uid;
-                const busy     = actionUid === u.uid;
+                const isAdmin = u.email === ADMIN_EMAIL;
+                const isSelf = u.uid === auth.currentUser?.uid;
+                const busy = actionUid === u.uid;
                 const initials = u.displayName
-                  ? u.displayName.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()
+                  ? u.displayName
+                      .split(' ')
+                      .map((n) => n[0])
+                      .join('')
+                      .slice(0, 2)
+                      .toUpperCase()
                   : u.email[0].toUpperCase();
 
                 return (
-                  <div key={u.uid} className={`space-y-2 p-4 ${u.disabled ? 'opacity-60' : ''}`}>
+                  <div
+                    key={u.uid}
+                    className={`space-y-2 p-4 ${u.disabled ? 'opacity-60' : ''}`}
+                  >
                     <div className='flex items-center justify-between gap-2'>
                       <div className='flex items-center gap-2.5 min-w-0'>
                         {u.photoURL ? (
                           // eslint-disable-next-line @next/next/no-img-element
-                          <img src={u.photoURL} alt='' className='h-9 w-9 rounded-full object-cover shrink-0' />
+                          <img
+                            src={u.photoURL}
+                            alt=''
+                            className='h-9 w-9 rounded-full object-cover shrink-0'
+                          />
                         ) : (
                           <div className='gradient-primary flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white'>
                             {initials}
@@ -423,7 +555,9 @@ export default function AdminPage() {
                               </span>
                             )}
                           </div>
-                          <div className='truncate text-xs text-muted-foreground'>{u.email}</div>
+                          <div className='truncate text-xs text-muted-foreground'>
+                            {u.email}
+                          </div>
                         </div>
                       </div>
                       {u.disabled ? (
@@ -437,7 +571,9 @@ export default function AdminPage() {
                       )}
                     </div>
                     <div className='flex items-center gap-2 text-[11px] text-muted-foreground'>
-                      {u.providers.map((p) => <ProviderBadge key={p} provider={p} />)}
+                      {u.providers.map((p) => (
+                        <ProviderBadge key={p} provider={p} />
+                      ))}
                       <span>·</span>
                       <span>Joined {fmt(u.createdAt)}</span>
                     </div>
@@ -445,40 +581,55 @@ export default function AdminPage() {
                       <div className='flex items-center gap-2 pt-1'>
                         <Link
                           href={`/admin/users/${u.uid}`}
-                          className='flex items-center gap-1 rounded-lg border border-violet-200 bg-violet-50 px-2.5 py-1.5 text-xs font-medium text-violet-600 dark:border-violet-900 dark:bg-violet-950/30 dark:text-violet-400'>
+                          className='flex items-center gap-1 rounded-lg border border-violet-200 bg-violet-50 px-2.5 py-1.5 text-xs font-medium text-violet-600 dark:border-violet-900 dark:bg-violet-950/30 dark:text-violet-400'
+                        >
                           <Eye size={11} /> View
                         </Link>
                         {!isAdmin && (
-                        <>
-                        <button
-                          onClick={() => handleToggleDisable(u)}
-                          disabled={busy}
-                          className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors disabled:opacity-50 ${
-                            u.disabled
-                              ? 'border-green-200 bg-green-50 text-green-700 dark:border-green-900 dark:bg-green-950/30 dark:text-green-400'
-                              : 'border-orange-200 bg-orange-50 text-orange-700 dark:border-orange-900 dark:bg-orange-950/30 dark:text-orange-400'
-                          }`}
-                        >
-                          {busy ? '…' : u.disabled ? 'Enable' : 'Disable'}
-                        </button>
-                        {confirmDelete === u.uid ? (
-                          <div className='flex items-center gap-1'>
-                            <button onClick={() => handleDelete(u.uid)} disabled={busy}
-                              className='rounded-lg bg-red-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-700 disabled:opacity-50'>
-                              Confirm Delete
+                          <>
+                            <button
+                              onClick={() => handleImpersonate(u)}
+                              disabled={busy}
+                              className='flex items-center gap-1 rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-1.5 text-xs font-medium text-amber-600 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-400'
+                            >
+                              <UserCog size={11} /> Impersonate
                             </button>
-                            <button onClick={() => setConfirmDelete(null)}
-                              className='rounded-lg border border-border px-2 py-1.5 text-xs text-muted-foreground hover:bg-accent'>
-                              Cancel
+                            <button
+                              onClick={() => handleToggleDisable(u)}
+                              disabled={busy}
+                              className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors disabled:opacity-50 ${
+                                u.disabled
+                                  ? 'border-green-200 bg-green-50 text-green-700 dark:border-green-900 dark:bg-green-950/30 dark:text-green-400'
+                                  : 'border-orange-200 bg-orange-50 text-orange-700 dark:border-orange-900 dark:bg-orange-950/30 dark:text-orange-400'
+                              }`}
+                            >
+                              {busy ? '…' : u.disabled ? 'Enable' : 'Disable'}
                             </button>
-                          </div>
-                        ) : (
-                          <button onClick={() => setConfirmDelete(u.uid)}
-                            className='flex items-center gap-1 rounded-lg border border-red-200 bg-red-50 px-2.5 py-1.5 text-xs font-medium text-red-500 dark:border-red-900 dark:bg-red-950/30'>
-                            <Trash2 size={11} /> Delete
-                          </button>
-                        )}
-                        </>
+                            {confirmDelete === u.uid ? (
+                              <div className='flex items-center gap-1'>
+                                <button
+                                  onClick={() => handleDelete(u.uid)}
+                                  disabled={busy}
+                                  className='rounded-lg bg-red-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-700 disabled:opacity-50'
+                                >
+                                  Confirm Delete
+                                </button>
+                                <button
+                                  onClick={() => setConfirmDelete(null)}
+                                  className='rounded-lg border border-border px-2 py-1.5 text-xs text-muted-foreground hover:bg-accent'
+                                >
+                                  Cancel
+                                </button>
+                              </div>
+                            ) : (
+                              <button
+                                onClick={() => setConfirmDelete(u.uid)}
+                                className='flex items-center gap-1 rounded-lg border border-red-200 bg-red-50 px-2.5 py-1.5 text-xs font-medium text-red-500 dark:border-red-900 dark:bg-red-950/30'
+                              >
+                                <Trash2 size={11} /> Delete
+                              </button>
+                            )}
+                          </>
                         )}
                       </div>
                     )}
@@ -492,7 +643,8 @@ export default function AdminPage() {
         {/* Footer count */}
         {!loading && (
           <div className='border-t border-border px-4 py-2.5 text-xs text-muted-foreground'>
-            Showing {filtered.length} of {users.length} user{users.length !== 1 ? 's' : ''}
+            Showing {filtered.length} of {users.length} user
+            {users.length !== 1 ? 's' : ''}
           </div>
         )}
       </div>
