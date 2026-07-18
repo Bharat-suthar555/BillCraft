@@ -10,6 +10,7 @@ import {
   LogOut,
   PenTool,
   PlusCircle,
+  Receipt,
   Settings,
   Shield,
   UserCircle,
@@ -20,8 +21,15 @@ import { useState } from 'react';
 
 const NAV = [
   {
-    href: '/invoices',
+    href: '/dashboard',
     icon: LayoutDashboard,
+    label: 'Dashboard',
+    sub: 'Overview & insights',
+    exact: true,
+  },
+  {
+    href: '/invoices',
+    icon: Receipt,
     label: 'Invoices',
     sub: 'All saved invoices',
     exact: true,

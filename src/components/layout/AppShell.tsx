@@ -18,7 +18,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (loading) return;
     if (!user && !isLoginPage) router.replace('/login');
-    if (user && isLoginPage) router.replace('/invoices');
+    if (user && isLoginPage) router.replace('/dashboard');
   }, [user, loading, isLoginPage, router]);
 
   // Register service worker for PWA
@@ -47,7 +47,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <>
-      <div className='flex h-screen flex-col overflow-hidden bg-background'>
+      <div className='safe-top flex h-screen flex-col overflow-hidden bg-background'>
         <ImpersonationBanner />
         <div className='flex flex-1 overflow-hidden'>
           {/* Sidebar — desktop only */}

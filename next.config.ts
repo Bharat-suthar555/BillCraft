@@ -8,7 +8,7 @@ const nextConfig: NextConfig = {
     ],
   },
   async redirects() {
-    return [{ source: '/', destination: '/invoices', permanent: false }];
+    return [{ source: '/', destination: '/dashboard', permanent: false }];
   },
   webpack: (config, { isServer }) => {
     if (!isServer) {
