@@ -6,6 +6,7 @@ import {
   AlertTriangle,
   Ban,
   CheckCircle2,
+  Eye,
   Mail,
   RefreshCw,
   Search,
@@ -14,10 +15,11 @@ import {
   UserCheck,
   Users,
 } from 'lucide-react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 
-const ADMIN_EMAIL = 'admin@billcraft.com';
+const ADMIN_EMAIL = 'tdc.bharat@gmail.com';
 
 interface AdminUser {
   uid:           string;
@@ -322,6 +324,17 @@ export default function AdminPage() {
                         {/* Actions */}
                         <td className='px-4 py-3'>
                           <div className='flex items-center justify-center gap-2'>
+                            {/* View data (read-only) */}
+                            {!isSelf && (
+                              <Link
+                                href={`/admin/users/${u.uid}`}
+                                title="View this user's data (read-only)"
+                                className='rounded-lg border border-violet-200 bg-violet-50 p-1.5 text-violet-600 hover:bg-violet-100 dark:border-violet-900 dark:bg-violet-950/30 dark:text-violet-400 dark:hover:bg-violet-950/50'
+                              >
+                                <Eye size={13} />
+                              </Link>
+                            )}
+
                             {/* Disable / Enable */}
                             {!isAdmin && !isSelf && (
                               <button
@@ -367,7 +380,7 @@ export default function AdminPage() {
                               )
                             )}
 
-                            {(isAdmin || isSelf) && (
+                            {isSelf && (
                               <span className='text-xs text-muted-foreground/50'>—</span>
                             )}
                           </div>
@@ -428,8 +441,15 @@ export default function AdminPage() {
                       <span>·</span>
                       <span>Joined {fmt(u.createdAt)}</span>
                     </div>
-                    {!isAdmin && !isSelf && (
+                    {!isSelf && (
                       <div className='flex items-center gap-2 pt-1'>
+                        <Link
+                          href={`/admin/users/${u.uid}`}
+                          className='flex items-center gap-1 rounded-lg border border-violet-200 bg-violet-50 px-2.5 py-1.5 text-xs font-medium text-violet-600 dark:border-violet-900 dark:bg-violet-950/30 dark:text-violet-400'>
+                          <Eye size={11} /> View
+                        </Link>
+                        {!isAdmin && (
+                        <>
                         <button
                           onClick={() => handleToggleDisable(u)}
                           disabled={busy}
@@ -457,6 +477,8 @@ export default function AdminPage() {
                             className='flex items-center gap-1 rounded-lg border border-red-200 bg-red-50 px-2.5 py-1.5 text-xs font-medium text-red-500 dark:border-red-900 dark:bg-red-950/30'>
                             <Trash2 size={11} /> Delete
                           </button>
+                        )}
+                        </>
                         )}
                       </div>
                     )}
