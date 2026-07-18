@@ -45,6 +45,7 @@ function templateFromDb(key: string, data: Record<string, unknown>): TemplateSet
     parentBrand: (data.parentBrand as string) ?? '',
     showSize: (data.showSize as boolean) ?? true,
     showSqft: (data.showSqft as boolean) ?? true,
+    nameBadge: (data.nameBadge as boolean) ?? true,
     createdAt: data.createdAt ? new Date(data.createdAt as number).toISOString() : undefined,
     updatedAt: data.updatedAt ? new Date(data.updatedAt as number).toISOString() : undefined,
   };

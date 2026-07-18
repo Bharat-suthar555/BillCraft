@@ -59,6 +59,7 @@ function templateFromDb(
     parentBrand: (data.parentBrand as string) ?? 'ADITYA BIRLA',
     showSize: (data.showSize as boolean) ?? true,
     showSqft: (data.showSqft as boolean) ?? true,
+    nameBadge: (data.nameBadge as boolean) ?? true,
     createdAt: data.createdAt
       ? new Date(data.createdAt as number).toISOString()
       : undefined,
