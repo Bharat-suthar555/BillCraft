@@ -1,6 +1,7 @@
 'use client';
 
 import { useAuth } from '@/contexts/AuthContext';
+import { ADMIN_EMAIL } from '@/lib/admin';
 import { cn } from '@/lib/utils';
 import {
   ChevronLeft,
@@ -79,8 +80,12 @@ export function Sidebar() {
         </div>
         {!collapsed && (
           <div className='ml-3 overflow-hidden'>
-            <div className='gradient-text text-sm font-bold leading-none'>BillCraft</div>
-            <div className='mt-0.5 text-xs text-muted-foreground leading-none'>Invoice System</div>
+            <div className='gradient-text text-sm font-bold leading-none'>
+              BillCraft
+            </div>
+            <div className='mt-0.5 text-xs text-muted-foreground leading-none'>
+              Invoice System
+            </div>
           </div>
         )}
       </div>
@@ -116,8 +121,8 @@ export function Sidebar() {
           );
         })}
 
-        {/* Admin link — only for admin@billcraft.com */}
-        {user?.email === 'admin@billcraft.com' && (
+        {/* Admin link */}
+        {user?.email === ADMIN_EMAIL && (
           <Link
             href='/admin'
             title={collapsed ? 'Admin Panel' : undefined}
@@ -131,7 +136,9 @@ export function Sidebar() {
             <Shield size={18} className='shrink-0' />
             {!collapsed && (
               <div className='overflow-hidden'>
-                <div className='truncate font-medium leading-none'>Admin Panel</div>
+                <div className='truncate font-medium leading-none'>
+                  Admin Panel
+                </div>
                 <div className='mt-0.5 truncate text-xs text-muted-foreground leading-none'>
                   Manage users
                 </div>

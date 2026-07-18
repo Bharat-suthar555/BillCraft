@@ -1,6 +1,7 @@
 'use client';
 
 import { useAuth } from '@/contexts/AuthContext';
+import { ADMIN_EMAIL } from '@/lib/admin';
 import { auth } from '@/lib/firebase';
 import { setImpersonation } from '@/lib/impersonation';
 import { signInWithCustomToken } from 'firebase/auth';
@@ -21,8 +22,6 @@ import {
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
-
-const ADMIN_EMAIL = 'tdc.bharat@gmail.com';
 
 interface AdminUser {
   uid: string;

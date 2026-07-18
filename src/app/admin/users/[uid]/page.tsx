@@ -3,15 +3,21 @@
 import { Badge } from '@/components/ui/badge';
 import { TemplateEditor } from '@/components/template/TemplateEditor';
 import { useAuth } from '@/contexts/AuthContext';
+import { ADMIN_EMAIL } from '@/lib/admin';
 import { auth } from '@/lib/firebase';
 import { InvoiceData, TemplateSettings } from '@/types';
 import dayjs from 'dayjs';
-import { AlertTriangle, ArrowLeft, Eye, FileText, LayoutTemplate, X } from 'lucide-react';
+import {
+  AlertTriangle,
+  ArrowLeft,
+  Eye,
+  FileText,
+  LayoutTemplate,
+  X,
+} from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-
-const ADMIN_EMAIL = 'tdc.bharat@gmail.com';
 
 const STATUS_VARIANT: Record<
   string,
@@ -56,7 +62,10 @@ export default function AdminUserDataPage() {
     adminFetch(`/api/admin/users/${uid}/data`)
       .then(async (res) => {
         if (!res.ok) throw new Error(await res.text());
-        return res.json() as Promise<{ invoices: InvoiceData[]; templates: TemplateSettings[] }>;
+        return res.json() as Promise<{
+          invoices: InvoiceData[];
+          templates: TemplateSettings[];
+        }>;
       })
       .then((data) => {
         setInvoices(data.invoices);
@@ -102,7 +111,9 @@ export default function AdminUserDataPage() {
         <div>
           <div className='flex items-center gap-2'>
             <Eye size={15} className='text-violet-500' />
-            <h1 className='text-xl font-bold text-foreground'>Admin user view</h1>
+            <h1 className='text-xl font-bold text-foreground'>
+              Admin user view
+            </h1>
           </div>
           <p className='mt-0.5 text-sm text-muted-foreground'>UID: {uid}</p>
         </div>
@@ -111,7 +122,9 @@ export default function AdminUserDataPage() {
       {/* ── Admin-mode banner ──────────────────────────────── */}
       <div className='flex items-center gap-2 rounded-xl border border-violet-200 bg-violet-50 px-4 py-3 text-sm text-violet-700 dark:border-violet-900 dark:bg-violet-950/30 dark:text-violet-400'>
         <AlertTriangle size={14} className='shrink-0' />
-        You are viewing this user&apos;s data as an admin. Invoices are read-only; templates can be edited — changes save directly to this user&apos;s account.
+        You are viewing this user&apos;s data as an admin. Invoices are
+        read-only; templates can be edited — changes save directly to this
+        user&apos;s account.
       </div>
 
       {error && (
@@ -126,12 +139,18 @@ export default function AdminUserDataPage() {
         <div className='mb-3 flex items-center gap-2 text-sm font-medium text-foreground'>
           <LayoutTemplate size={14} />
           Templates
-          <span className='text-xs text-muted-foreground'>({templates.length})</span>
+          <span className='text-xs text-muted-foreground'>
+            ({templates.length})
+          </span>
         </div>
         {loading ? (
-          <div className='py-6 text-center text-sm text-muted-foreground'>Loading…</div>
+          <div className='py-6 text-center text-sm text-muted-foreground'>
+            Loading…
+          </div>
         ) : templates.length === 0 ? (
-          <div className='py-6 text-center text-sm text-muted-foreground'>No templates.</div>
+          <div className='py-6 text-center text-sm text-muted-foreground'>
+            No templates.
+          </div>
         ) : (
           <div className='flex flex-wrap gap-2'>
             {templates.map((t) => (
@@ -178,7 +197,9 @@ export default function AdminUserDataPage() {
         <div className='flex items-center gap-2 border-b border-border px-4 py-3 text-sm font-medium text-foreground'>
           <FileText size={14} />
           Invoices
-          <span className='text-xs text-muted-foreground'>({invoices.length})</span>
+          <span className='text-xs text-muted-foreground'>
+            ({invoices.length})
+          </span>
         </div>
 
         {loading ? (
@@ -203,9 +224,16 @@ export default function AdminUserDataPage() {
               </thead>
               <tbody className='divide-y divide-border'>
                 {invoices.map((inv) => (
-                  <tr key={inv._id} className='hover:bg-muted/30 transition-colors'>
-                    <td className='px-4 py-3 font-medium text-foreground'>{inv.billNo || '—'}</td>
-                    <td className='px-4 py-3 text-foreground'>{inv.customerName || '—'}</td>
+                  <tr
+                    key={inv._id}
+                    className='hover:bg-muted/30 transition-colors'
+                  >
+                    <td className='px-4 py-3 font-medium text-foreground'>
+                      {inv.billNo || '—'}
+                    </td>
+                    <td className='px-4 py-3 text-foreground'>
+                      {inv.customerName || '—'}
+                    </td>
                     <td className='px-4 py-3 text-muted-foreground'>
                       {inv.date ? dayjs(inv.date).format('DD MMM YYYY') : '—'}
                     </td>
@@ -213,7 +241,9 @@ export default function AdminUserDataPage() {
                       {inv.total?.toLocaleString('en-IN') ?? 0}
                     </td>
                     <td className='px-4 py-3'>
-                      <Badge variant={STATUS_VARIANT[inv.status] ?? 'secondary'}>
+                      <Badge
+                        variant={STATUS_VARIANT[inv.status] ?? 'secondary'}
+                      >
                         {inv.status}
                       </Badge>
                     </td>

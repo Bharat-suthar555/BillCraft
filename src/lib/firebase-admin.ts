@@ -1,6 +1,7 @@
 import { cert, getApps, initializeApp } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
 import { getDatabase } from 'firebase-admin/database';
+import { ADMIN_EMAIL } from './admin';
 
 const ADMIN_APP = 'billcraft-admin';
 
@@ -21,7 +22,7 @@ const adminApp =
 export const adminAuth = getAuth(adminApp);
 export const adminDb = getDatabase(adminApp);
 
-export const ADMIN_EMAIL = 'tdc.bharat@gmail.com';
+export { ADMIN_EMAIL };
 
 export async function verifyAdminToken(token: string): Promise<boolean> {
   try {
