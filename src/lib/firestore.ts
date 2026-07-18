@@ -60,6 +60,8 @@ function templateFromDb(
     showSize: (data.showSize as boolean) ?? true,
     showSqft: (data.showSqft as boolean) ?? true,
     nameBadge: (data.nameBadge as boolean) ?? true,
+    overflowMode:
+      (data.overflowMode as TemplateSettings['overflowMode']) ?? 'continue',
     createdAt: data.createdAt
       ? new Date(data.createdAt as number).toISOString()
       : undefined,
@@ -232,6 +234,8 @@ export async function getPreferences(): Promise<UserPreferences> {
   };
 }
 
-export async function savePreferences(prefs: Partial<UserPreferences>): Promise<void> {
+export async function savePreferences(
+  prefs: Partial<UserPreferences>,
+): Promise<void> {
   await update(ref(db, userPath('preferences')), prefs);
 }

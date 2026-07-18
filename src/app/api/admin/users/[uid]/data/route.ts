@@ -9,7 +9,10 @@ function toArray<T>(val: unknown): T[] {
   return [];
 }
 
-function invoiceFromDb(key: string, data: Record<string, unknown>): InvoiceData {
+function invoiceFromDb(
+  key: string,
+  data: Record<string, unknown>,
+): InvoiceData {
   return {
     _id: key,
     templateId: (data.templateId as string) ?? '',
@@ -22,12 +25,19 @@ function invoiceFromDb(key: string, data: Record<string, unknown>): InvoiceData 
     total: (data.total as number) ?? 0,
     status: (data.status as InvoiceData['status']) ?? 'draft',
     notes: (data.notes as string) ?? '',
-    createdAt: data.createdAt ? new Date(data.createdAt as number).toISOString() : undefined,
-    updatedAt: data.updatedAt ? new Date(data.updatedAt as number).toISOString() : undefined,
+    createdAt: data.createdAt
+      ? new Date(data.createdAt as number).toISOString()
+      : undefined,
+    updatedAt: data.updatedAt
+      ? new Date(data.updatedAt as number).toISOString()
+      : undefined,
   };
 }
 
-function templateFromDb(key: string, data: Record<string, unknown>): TemplateSettings {
+function templateFromDb(
+  key: string,
+  data: Record<string, unknown>,
+): TemplateSettings {
   return {
     _id: key,
     name: (data.name as string) ?? 'Default Template',
@@ -46,8 +56,14 @@ function templateFromDb(key: string, data: Record<string, unknown>): TemplateSet
     showSize: (data.showSize as boolean) ?? true,
     showSqft: (data.showSqft as boolean) ?? true,
     nameBadge: (data.nameBadge as boolean) ?? true,
-    createdAt: data.createdAt ? new Date(data.createdAt as number).toISOString() : undefined,
-    updatedAt: data.updatedAt ? new Date(data.updatedAt as number).toISOString() : undefined,
+    overflowMode:
+      (data.overflowMode as TemplateSettings['overflowMode']) ?? 'continue',
+    createdAt: data.createdAt
+      ? new Date(data.createdAt as number).toISOString()
+      : undefined,
+    updatedAt: data.updatedAt
+      ? new Date(data.updatedAt as number).toISOString()
+      : undefined,
   };
 }
 
@@ -69,7 +85,10 @@ export async function GET(
     return NextResponse.json({ invoices: [], templates: [] });
   }
 
-  const val = snap.val() as Record<string, Record<string, Record<string, unknown>>>;
+  const val = snap.val() as Record<
+    string,
+    Record<string, Record<string, unknown>>
+  >;
 
   const invoices = Object.entries(val.invoices ?? {})
     .map(([key, data]) => invoiceFromDb(key, data))

@@ -19,6 +19,10 @@ export interface TemplateSettings {
   // accent-colored badge box. Defaults to true (badge) when unset, so
   // existing templates keep their current look.
   nameBadge?: boolean;
+  // What happens when line items don't fit on one page.
+  // 'continue' — one running table, header row repeats on later pages, single grand total (default).
+  // 'split'    — each page repeats the full invoice header and shows its own page-only total.
+  overflowMode?: 'continue' | 'split';
   createdAt?: string;
   updatedAt?: string;
 }
@@ -40,6 +44,7 @@ export const DEFAULT_TEMPLATE: Omit<TemplateSettings, '_id'> = {
   showSize: true,
   showSqft: true,
   nameBadge: true,
+  overflowMode: 'continue',
 };
 
 export const MR_TEMPLATE: Omit<TemplateSettings, '_id'> = {
@@ -59,6 +64,7 @@ export const MR_TEMPLATE: Omit<TemplateSettings, '_id'> = {
   showSize: true,
   showSqft: true,
   nameBadge: false,
+  overflowMode: 'continue',
 };
 
 export interface LineItem {
