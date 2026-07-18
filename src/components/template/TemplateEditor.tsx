@@ -110,6 +110,11 @@ export function TemplateEditor({ template, onChange, onSave, saving }: Props) {
             placeholder="UltraTech"
           />
         </div>
+        <Toggle
+          label="Show company name as a colored badge"
+          checked={template.nameBadge ?? true}
+          onChange={v => set('nameBadge', v)}
+        />
         <div className="space-y-1.5">
           <Label>Parent Brand / Group Name</Label>
           <Input

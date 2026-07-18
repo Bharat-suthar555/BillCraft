@@ -8,7 +8,7 @@ import {
   getTemplates,
   updateTemplate,
 } from '@/lib/firestore';
-import { DEFAULT_TEMPLATE, EMPTY_LINE_ITEM, TemplateSettings } from '@/types';
+import { DEFAULT_TEMPLATE, EMPTY_LINE_ITEM, MR_TEMPLATE, TemplateSettings } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
 import { Check, ChevronRight, Copy, PlusCircle, Trash2 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -80,12 +80,12 @@ export default function TemplatesPage() {
     return () => ro.disconnect();
   }, []);
 
-  const handleNew = useCallback(async () => {
+  const handleNew = useCallback(async (preset: Omit<TemplateSettings, '_id'> = DEFAULT_TEMPLATE) => {
     setSaving(true);
     try {
       const t = await createTemplate({
-        ...DEFAULT_TEMPLATE,
-        name: `Template ${templates.length + 1}`,
+        ...preset,
+        name: preset === MR_TEMPLATE ? 'MR Invoice' : `Template ${templates.length + 1}`,
       });
       setTemplates((prev) => [t, ...prev]);
       setSelected(t);
@@ -172,13 +172,22 @@ export default function TemplatesPage() {
             Customize the look of your invoices
           </p>
         </div>
-        <button
-          onClick={handleNew}
-          disabled={saving}
-          className='gradient-primary inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium transition-opacity hover:opacity-90 disabled:opacity-60'
-        >
-          <PlusCircle size={14} /> New Template
-        </button>
+        <div className='flex items-center gap-2'>
+          <button
+            onClick={() => handleNew(MR_TEMPLATE)}
+            disabled={saving}
+            className='inline-flex items-center gap-1.5 rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent disabled:opacity-60'
+          >
+            <PlusCircle size={14} /> New MR Template
+          </button>
+          <button
+            onClick={() => handleNew()}
+            disabled={saving}
+            className='gradient-primary inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium transition-opacity hover:opacity-90 disabled:opacity-60'
+          >
+            <PlusCircle size={14} /> New Template
+          </button>
+        </div>
       </div>
 
       {/* ── Templates list ──────────────────────────────────── */}

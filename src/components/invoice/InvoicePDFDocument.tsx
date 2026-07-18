@@ -87,21 +87,27 @@ export function InvoicePDFDocument({ invoice, template }: Props) {
               INVOICE
             </Text>
 
-            {/* ── Line 2: [UltraTech badge]  Waterproofing & Solutions ── */}
+            {/* ── Line 2: company name (badge or plain)  Waterproofing & Solutions ── */}
             <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
-              <View style={{
-                backgroundColor: acc,
-                paddingHorizontal: 10,
-                paddingVertical: 3,
-                borderRadius: 3,
-                borderBottomWidth: 3,
-                borderBottomColor: nav,
-                marginRight: 10,
-              }}>
-                <Text style={{ fontFamily: 'Helvetica-Bold', fontSize: 18, color: '#1a1a1a' }}>
+              {template.nameBadge === false ? (
+                <Text style={{ fontFamily: 'Helvetica-Bold', fontSize: 18, color: '#1a1a1a', marginRight: 10 }}>
                   {template.companyName}
                 </Text>
-              </View>
+              ) : (
+                <View style={{
+                  backgroundColor: acc,
+                  paddingHorizontal: 10,
+                  paddingVertical: 3,
+                  borderRadius: 3,
+                  borderBottomWidth: 3,
+                  borderBottomColor: nav,
+                  marginRight: 10,
+                }}>
+                  <Text style={{ fontFamily: 'Helvetica-Bold', fontSize: 18, color: '#1a1a1a' }}>
+                    {template.companyName}
+                  </Text>
+                </View>
+              )}
               <Text style={{ fontFamily: 'Helvetica-Bold', fontSize: 16, color: '#111' }}>
                 {template.tagline}
               </Text>

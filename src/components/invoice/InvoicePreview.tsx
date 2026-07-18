@@ -92,22 +92,13 @@ export function InvoicePreview({ invoice, template, scale = 1 }: Props) {
             INVOICE
           </div>
 
-          {/* Row 2: [UltraTech badge] Waterproofing & Solutions */}
+          {/* Row 2: company name (badge or plain) + Waterproofing & Solutions */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            {/* Yellow badge with underline */}
-            <div
-              style={{
-                backgroundColor: acc,
-                padding: '3px 12px',
-                borderRadius: 3,
-                borderBottom: `3px solid ${nav}`,
-              }}
-            >
+            {template.nameBadge === false ? (
               <span
                 style={{
                   color: '#1a1a1a',
                   fontWeight: 900,
-                  fontStyle: 'italic',
                   fontSize: 20,
                   fontFamily: '"Arial Black", Arial, sans-serif',
                   letterSpacing: 0.5,
@@ -115,7 +106,30 @@ export function InvoicePreview({ invoice, template, scale = 1 }: Props) {
               >
                 {template.companyName}
               </span>
-            </div>
+            ) : (
+              /* Yellow badge with underline */
+              <div
+                style={{
+                  backgroundColor: acc,
+                  padding: '3px 12px',
+                  borderRadius: 3,
+                  borderBottom: `3px solid ${nav}`,
+                }}
+              >
+                <span
+                  style={{
+                    color: '#1a1a1a',
+                    fontWeight: 900,
+                    fontStyle: 'italic',
+                    fontSize: 20,
+                    fontFamily: '"Arial Black", Arial, sans-serif',
+                    letterSpacing: 0.5,
+                  }}
+                >
+                  {template.companyName}
+                </span>
+              </div>
+            )}
             {/* Tagline */}
             <span
               style={{
