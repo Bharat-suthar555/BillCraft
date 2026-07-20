@@ -88,6 +88,23 @@
   box-sizing: border-box;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 body {
   background-color: var(--background);
   color: var(--foreground);
@@ -100,10 +117,65 @@ body {
 .gradient-primary {
   background: linear-gradient(135deg, #1890ff 0%, #722ed1 100%);
   color: #fff;
+  transition:
+    background 0.2s ease,
+    transform 0.15s ease,
+    box-shadow 0.2s ease;
 }
 
 .gradient-primary:hover {
   background: linear-gradient(135deg, #0c7ae8 0%, #5f24b8 100%);
+}
+
+.gradient-primary:active {
+  transform: scale(0.97);
+}
+
+/* ── Dropdown / modal entrance ────────────────────────────────────────────
+   Applies to popovers, dropdowns and modals so they ease in instead of
+   popping into existence. */
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes modal-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes overlay-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-pop-in {
+  animation: pop-in 0.16s cubic-bezier(0.22, 1, 0.36, 1) both;
+  transform-origin: top right;
+}
+
+.animate-modal-in {
+  animation: modal-in 0.18s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-overlay-in {
+  animation: overlay-in 0.15s ease both;
 }
 
 .gradient-text {

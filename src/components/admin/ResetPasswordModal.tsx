@@ -63,8 +63,8 @@ export function ResetPasswordModal({ uid, email, onClose }: Props) {
   };
 
   return (
-    <div className='fixed inset-0 z-100 flex items-center justify-center bg-black/50 p-4'>
-      <div className='w-full max-w-sm rounded-2xl border border-border bg-card p-5 shadow-2xl'>
+    <div className='animate-overlay-in fixed inset-0 z-100 flex items-center justify-center bg-black/50 p-4'>
+      <div className='animate-modal-in w-full max-w-sm rounded-2xl border border-border bg-card p-5 shadow-2xl'>
         <div className='mb-4 flex items-center justify-between'>
           <div className='flex items-center gap-2'>
             <div className='flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/10'>

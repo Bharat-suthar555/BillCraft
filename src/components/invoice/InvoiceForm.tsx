@@ -209,7 +209,7 @@ export function InvoiceForm({
                 <ChevronDown size={12} />
               </button>
               {pickerOpen && (
-                <div className='absolute right-0 z-20 mt-1 w-72 max-w-[80vw] rounded-lg border border-border bg-card shadow-lg'>
+                <div className='animate-pop-in absolute right-0 z-20 mt-1 w-72 max-w-[80vw] rounded-lg border border-border bg-card shadow-lg'>
                   <div className='relative border-b border-border p-2'>
                     <Search
                       size={12}
