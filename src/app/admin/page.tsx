@@ -591,69 +591,84 @@ export default function AdminPage() {
                       <span>·</span>
                       <span>Joined {fmt(u.createdAt)}</span>
                     </div>
-                    {!isSelf && (
-                      <div className='flex items-center gap-2 pt-1'>
-                        <Link
-                          href={`/admin/users/${u.uid}`}
-                          className='flex items-center gap-1 rounded-lg border border-violet-200 bg-violet-50 px-2.5 py-1.5 text-xs font-medium text-violet-600 dark:border-violet-900 dark:bg-violet-950/30 dark:text-violet-400'
-                        >
-                          <Eye size={11} /> View
-                        </Link>
-                        {!isAdmin && (
-                          <>
-                            <button
-                              onClick={() => handleImpersonate(u)}
-                              disabled={busy}
-                              className='flex items-center gap-1 rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-1.5 text-xs font-medium text-amber-600 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-400'
-                            >
-                              <UserCog size={11} /> Impersonate
-                            </button>
-                            <button
-                              onClick={() => setResetPwUser(u)}
-                              disabled={busy}
-                              className='flex items-center gap-1 rounded-lg border border-blue-200 bg-blue-50 px-2.5 py-1.5 text-xs font-medium text-blue-600 dark:border-blue-900 dark:bg-blue-950/30 dark:text-blue-400'
-                            >
-                              <KeyRound size={11} /> Reset PW
-                            </button>
-                            <button
-                              onClick={() => handleToggleDisable(u)}
-                              disabled={busy}
-                              className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors disabled:opacity-50 ${
-                                u.disabled
-                                  ? 'border-green-200 bg-green-50 text-green-700 dark:border-green-900 dark:bg-green-950/30 dark:text-green-400'
-                                  : 'border-orange-200 bg-orange-50 text-orange-700 dark:border-orange-900 dark:bg-orange-950/30 dark:text-orange-400'
-                              }`}
-                            >
-                              {busy ? '…' : u.disabled ? 'Enable' : 'Disable'}
-                            </button>
-                            {confirmDelete === u.uid ? (
-                              <div className='flex items-center gap-1'>
-                                <button
-                                  onClick={() => handleDelete(u.uid)}
-                                  disabled={busy}
-                                  className='rounded-lg bg-red-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-700 disabled:opacity-50'
-                                >
-                                  Confirm Delete
-                                </button>
-                                <button
-                                  onClick={() => setConfirmDelete(null)}
-                                  className='rounded-lg border border-border px-2 py-1.5 text-xs text-muted-foreground hover:bg-accent'
-                                >
-                                  Cancel
-                                </button>
-                              </div>
-                            ) : (
+                    {!isSelf &&
+                      (confirmDelete === u.uid ? (
+                        <div className='flex items-center gap-2 pt-1'>
+                          <span className='flex-1 text-xs text-muted-foreground'>
+                            Delete this user?
+                          </span>
+                          <button
+                            onClick={() => setConfirmDelete(null)}
+                            className='rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-accent'
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            onClick={() => handleDelete(u.uid)}
+                            disabled={busy}
+                            className='rounded-lg bg-red-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-700 disabled:opacity-50'
+                          >
+                            {busy ? '…' : 'Confirm'}
+                          </button>
+                        </div>
+                      ) : (
+                        <div className='flex items-center gap-1.5 pt-1'>
+                          <Link
+                            href={`/admin/users/${u.uid}`}
+                            title='View data'
+                            className='flex h-8 w-8 items-center justify-center rounded-lg border border-violet-200 bg-violet-50 text-violet-600 dark:border-violet-900 dark:bg-violet-950/30 dark:text-violet-400'
+                          >
+                            <Eye size={14} />
+                          </Link>
+                          {!isAdmin && (
+                            <>
+                              <button
+                                onClick={() => handleImpersonate(u)}
+                                disabled={busy}
+                                title='Impersonate'
+                                className='flex h-8 w-8 items-center justify-center rounded-lg border border-amber-200 bg-amber-50 text-amber-600 disabled:opacity-50 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-400'
+                              >
+                                <UserCog size={14} />
+                              </button>
+                              <button
+                                onClick={() => setResetPwUser(u)}
+                                disabled={busy}
+                                title='Reset password'
+                                className='flex h-8 w-8 items-center justify-center rounded-lg border border-blue-200 bg-blue-50 text-blue-600 disabled:opacity-50 dark:border-blue-900 dark:bg-blue-950/30 dark:text-blue-400'
+                              >
+                                <KeyRound size={14} />
+                              </button>
+                              <button
+                                onClick={() => handleToggleDisable(u)}
+                                disabled={busy}
+                                title={
+                                  u.disabled ? 'Enable user' : 'Disable user'
+                                }
+                                className={`flex h-8 w-8 items-center justify-center rounded-lg border disabled:opacity-50 ${
+                                  u.disabled
+                                    ? 'border-green-200 bg-green-50 text-green-700 dark:border-green-900 dark:bg-green-950/30 dark:text-green-400'
+                                    : 'border-orange-200 bg-orange-50 text-orange-700 dark:border-orange-900 dark:bg-orange-950/30 dark:text-orange-400'
+                                }`}
+                              >
+                                {busy ? (
+                                  <span className='h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent' />
+                                ) : u.disabled ? (
+                                  <UserCheck size={14} />
+                                ) : (
+                                  <Ban size={14} />
+                                )}
+                              </button>
                               <button
                                 onClick={() => setConfirmDelete(u.uid)}
-                                className='flex items-center gap-1 rounded-lg border border-red-200 bg-red-50 px-2.5 py-1.5 text-xs font-medium text-red-500 dark:border-red-900 dark:bg-red-950/30'
+                                title='Delete user'
+                                className='flex h-8 w-8 items-center justify-center rounded-lg border border-red-200 bg-red-50 text-red-500 dark:border-red-900 dark:bg-red-950/30'
                               >
-                                <Trash2 size={11} /> Delete
+                                <Trash2 size={14} />
                               </button>
-                            )}
-                          </>
-                        )}
-                      </div>
-                    )}
+                            </>
+                          )}
+                        </div>
+                      ))}
                   </div>
                 );
               })}
