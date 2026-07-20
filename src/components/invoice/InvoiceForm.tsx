@@ -22,6 +22,19 @@ interface Props {
   saving?: boolean;
 }
 
+// Amount = Rate × sq.ft when the sq.ft column is shown; otherwise Rate × Size,
+// so hiding sq.ft doesn't silently drop the quantity from the calculation.
+function computeAmount(
+  item: Pick<LineItem, 'rate' | 'sqft' | 'size'>,
+  template: TemplateSettings,
+): number {
+  const rate = parseFloat(item.rate) || 0;
+  const qty = template.showSqft
+    ? parseFloat(item.sqft) || 0
+    : parseFloat(item.size) || 0;
+  return rate * qty;
+}
+
 type FormValues = {
   billNo: string;
   date: string;
@@ -63,33 +76,29 @@ export function InvoiceForm({
 
   const computeTotal = useCallback(
     (items: LineItem[]) => {
-      return items.reduce((sum, item) => {
-        const rate = parseFloat(item.rate) || 0;
-        const sqft = parseFloat(item.sqft) || 0;
-        const amount = template.showSqft ? rate * sqft : rate;
-        return sum + amount;
-      }, 0);
+      return items.reduce(
+        (sum, item) => sum + computeAmount(item, template),
+        0,
+      );
     },
-    [template.showSqft],
+    [template],
   );
 
   useEffect(() => {
-    const updatedItems = values.lineItems.map((item) => {
-      const rate = parseFloat(item.rate) || 0;
-      const sqft = parseFloat(item.sqft) || 0;
-      return { ...item, amount: template.showSqft ? rate * sqft : rate };
-    });
+    const updatedItems = values.lineItems.map((item) => ({
+      ...item,
+      amount: computeAmount(item, template),
+    }));
     const total = computeTotal(updatedItems);
     onChange?.({ ...values, lineItems: updatedItems, total });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify(values), template.showSqft]);
+  }, [JSON.stringify(values), template]);
 
   const onSubmit = (data: FormValues) => {
-    const updatedItems = data.lineItems.map((item) => {
-      const rate = parseFloat(item.rate) || 0;
-      const sqft = parseFloat(item.sqft) || 0;
-      return { ...item, amount: template.showSqft ? rate * sqft : rate };
-    });
+    const updatedItems = data.lineItems.map((item) => ({
+      ...item,
+      amount: computeAmount(item, template),
+    }));
     const total = computeTotal(updatedItems);
     onSave?.({ ...data, lineItems: updatedItems, total });
   };
@@ -167,9 +176,10 @@ export function InvoiceForm({
             </thead>
             <tbody className='divide-y divide-border'>
               {fields.map((field, index) => {
-                const rate = parseFloat(values.lineItems[index]?.rate) || 0;
-                const sqft = parseFloat(values.lineItems[index]?.sqft) || 0;
-                const amount = template.showSqft ? rate * sqft : rate;
+                const amount = computeAmount(
+                  values.lineItems[index] ?? { rate: '', sqft: '', size: '' },
+                  template,
+                );
                 return (
                   <tr key={field.id}>
                     <td className='py-1.5 pl-1 text-muted-foreground'>
@@ -253,14 +263,9 @@ export function InvoiceForm({
             <span className='text-muted-foreground'>Total:</span>
             <span style={{ color: template.primaryColor }}>
               {template.currencySymbol}{' '}
-              {computeTotal(
-                values.lineItems.map((item) => ({
-                  ...item,
-                  amount:
-                    (parseFloat(item.rate) || 0) *
-                    (template.showSqft ? parseFloat(item.sqft) || 0 : 1),
-                })),
-              ).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+              {computeTotal(values.lineItems).toLocaleString('en-IN', {
+                minimumFractionDigits: 2,
+              })}
             </span>
           </div>
         </div>
