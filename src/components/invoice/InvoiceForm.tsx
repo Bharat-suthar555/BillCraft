@@ -155,7 +155,96 @@ export function InvoiceForm({
           Line Items
         </h3>
 
-        <div className='overflow-x-auto -mx-1'>
+        {/* Mobile: stacked cards — avoids sideways scrolling mid-entry */}
+        <div className='space-y-3 sm:hidden'>
+          {fields.map((field, index) => {
+            const amount = computeAmount(
+              values.lineItems[index] ?? { rate: '', sqft: '', size: '' },
+              template,
+            );
+            return (
+              <div
+                key={field.id}
+                className='space-y-2.5 rounded-xl border border-border p-3'
+              >
+                <div className='flex items-center justify-between'>
+                  <span className='text-xs font-medium text-muted-foreground'>
+                    Item {index + 1}
+                  </span>
+                  <button
+                    type='button'
+                    onClick={() => remove(index)}
+                    className='p-1 text-muted-foreground/40 hover:text-red-400 transition-colors disabled:opacity-30'
+                    disabled={fields.length === 1}
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+                <Input
+                  placeholder='Description of work'
+                  className='h-9'
+                  {...register(`lineItems.${index}.description`)}
+                />
+                <div className='grid grid-cols-2 gap-2'>
+                  {template.showSize && (
+                    <div className='space-y-1'>
+                      <Label className='text-[10px] text-muted-foreground'>
+                        Size
+                      </Label>
+                      <Input
+                        placeholder='10×10'
+                        className='h-9'
+                        {...register(`lineItems.${index}.size`)}
+                      />
+                    </div>
+                  )}
+                  {template.showSqft && (
+                    <div className='space-y-1'>
+                      <Label className='text-[10px] text-muted-foreground'>
+                        sq.ft
+                      </Label>
+                      <Input
+                        type='number'
+                        min='0'
+                        placeholder='100'
+                        className='h-9'
+                        {...register(`lineItems.${index}.sqft`)}
+                      />
+                    </div>
+                  )}
+                  <div className='space-y-1'>
+                    <Label className='text-[10px] text-muted-foreground'>
+                      Rate ({template.currencySymbol})
+                    </Label>
+                    <Input
+                      type='number'
+                      min='0'
+                      step='0.01'
+                      placeholder='0.00'
+                      className='h-9'
+                      {...register(`lineItems.${index}.rate`)}
+                    />
+                  </div>
+                  <div className='space-y-1'>
+                    <Label className='text-[10px] text-muted-foreground'>
+                      Amount
+                    </Label>
+                    <div className='flex h-9 items-center justify-end rounded-md border border-input bg-muted/40 px-3 text-sm font-medium'>
+                      {amount > 0
+                        ? amount.toLocaleString('en-IN', {
+                            minimumFractionDigits: 2,
+                          })
+                        : '—'}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Desktop: table */}
+        <div className='hidden overflow-x-auto -mx-1 sm:block'>
           <table className='w-full text-sm min-w-125'>
             <thead>
               <tr className='text-xs font-medium text-muted-foreground uppercase'>

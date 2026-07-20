@@ -239,13 +239,19 @@ export function Sidebar() {
 /* ── Mobile bottom nav ──────────────────────────────────────────────────── */
 export function MobileBottomNav() {
   const pathname = usePathname();
+  const { user } = useAuth();
+
+  const items =
+    user?.email === ADMIN_EMAIL
+      ? [...NAV, { href: '/admin', icon: Shield, label: 'Admin', exact: true }]
+      : NAV;
 
   return (
     <nav
       className='fixed bottom-0 left-0 right-0 z-50 flex border-t border-border bg-card sm:hidden'
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
-      {NAV.map(({ href, icon: Icon, label, exact }) => {
+      {items.map(({ href, icon: Icon, label, exact }) => {
         const active = exact ? pathname === href : pathname.startsWith(href);
         return (
           <Link

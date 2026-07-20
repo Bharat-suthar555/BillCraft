@@ -2,7 +2,7 @@
 
 import { useAuth } from '@/contexts/AuthContext';
 import { Eye, EyeOff, FileText, Palette, Smartphone } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 function GoogleIcon() {
   return (
@@ -48,10 +48,24 @@ const FEATURES = [
 type Tab = 'signin' | 'signup';
 
 export default function LoginPage() {
-  const { signInWithGoogle, signInWithEmail, signUpWithEmail } = useAuth();
+  const { signInWithGoogle, signInWithEmail, signUpWithEmail, redirectError } =
+    useAuth();
   const [tab, setTab] = useState<Tab>('signin');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [standalone, setStandalone] = useState(false);
+
+  useEffect(() => {
+    setStandalone(
+      window.matchMedia('(display-mode: standalone)').matches ||
+        (window.navigator as unknown as { standalone?: boolean }).standalone ===
+          true,
+    );
+  }, []);
+
+  useEffect(() => {
+    if (redirectError) setError(redirectError);
+  }, [redirectError]);
 
   const [siEmail, setSiEmail] = useState('');
   const [siPassword, setSiPassword] = useState('');
@@ -361,6 +375,15 @@ export default function LoginPage() {
             )}
             {loading ? 'Please wait…' : 'Continue with Google'}
           </button>
+
+          {standalone && (
+            <p className='rounded-xl bg-amber-50 px-3.5 py-2.5 text-center text-[11px] text-amber-700 dark:bg-amber-950/30 dark:text-amber-400'>
+              Google sign-in can be unreliable in the installed app on iOS. If
+              it doesn&apos;t work, use email &amp; password above, or open this
+              site in Safari once to sign in with Google — it&apos;ll carry over
+              here.
+            </p>
+          )}
 
           <p className='text-center text-[11px] text-muted-foreground/70'>
             Your data is private and only visible to you.

@@ -22,17 +22,26 @@ import { createContext, useContext, useEffect, useState } from 'react';
 interface AuthContextType {
   user: User | null;
   loading: boolean;
+  redirectError: string | null;
   signInWithGoogle: () => Promise<void>;
   signInWithEmail: (email: string, password: string) => Promise<void>;
-  signUpWithEmail: (email: string, password: string, displayName: string) => Promise<void>;
+  signUpWithEmail: (
+    email: string,
+    password: string,
+    displayName: string,
+  ) => Promise<void>;
   updateUserDisplayName: (displayName: string) => Promise<void>;
-  updateUserPassword: (currentPassword: string, newPassword: string) => Promise<void>;
+  updateUserPassword: (
+    currentPassword: string,
+    newPassword: string,
+  ) => Promise<void>;
   signOut: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
   loading: true,
+  redirectError: null,
   signInWithGoogle: async () => {},
   signInWithEmail: async () => {},
   signUpWithEmail: async () => {},
@@ -46,18 +55,27 @@ function isPwaStandalone(): boolean {
   if (typeof window === 'undefined') return false;
   return (
     window.matchMedia('(display-mode: standalone)').matches ||
-    (window.navigator as unknown as { standalone?: boolean }).standalone === true
+    (window.navigator as unknown as { standalone?: boolean }).standalone ===
+      true
   );
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [redirectError, setRedirectError] = useState<string | null>(null);
 
   useEffect(() => {
     // Process any pending Google redirect (used in PWA / standalone mode).
     // Must be called on every app load so Firebase can complete the OAuth flow.
-    getRedirectResult(auth).catch(() => {});
+    // Errors here are surfaced (not swallowed) — a redirect sign-in failing
+    // silently is indistinguishable from the user just not being signed in.
+    getRedirectResult(auth).catch((e: unknown) => {
+      const code = (e as { code?: string })?.code;
+      setRedirectError(
+        code ? `Google sign-in failed (${code}).` : 'Google sign-in failed.',
+      );
+    });
 
     return onAuthStateChanged(auth, (u) => {
       setUser(u);
@@ -67,6 +85,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signInWithGoogle = async () => {
+    setRedirectError(null);
     const provider = new GoogleAuthProvider();
     if (isPwaStandalone()) {
       // signInWithPopup is broken in iOS standalone / PWA mode — use redirect instead
@@ -80,7 +99,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await signInWithEmailAndPassword(auth, email, password);
   };
 
-  const signUpWithEmail = async (email: string, password: string, displayName: string) => {
+  const signUpWithEmail = async (
+    email: string,
+    password: string,
+    displayName: string,
+  ) => {
     const cred = await createUserWithEmailAndPassword(auth, email, password);
     await updateProfile(cred.user, { displayName });
     setUser((prev) => (prev ? ({ ...prev, displayName } as User) : null));
@@ -92,9 +115,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser((prev) => (prev ? ({ ...prev, displayName } as User) : null));
   };
 
-  const updateUserPassword = async (currentPassword: string, newPassword: string) => {
+  const updateUserPassword = async (
+    currentPassword: string,
+    newPassword: string,
+  ) => {
     if (!auth.currentUser?.email) throw new Error('Not authenticated');
-    const credential = EmailAuthProvider.credential(auth.currentUser.email, currentPassword);
+    const credential = EmailAuthProvider.credential(
+      auth.currentUser.email,
+      currentPassword,
+    );
     await reauthenticateWithCredential(auth.currentUser, credential);
     await fbUpdatePassword(auth.currentUser, newPassword);
   };
@@ -109,6 +138,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       value={{
         user,
         loading,
+        redirectError,
         signInWithGoogle,
         signInWithEmail,
         signUpWithEmail,
