@@ -1,5 +1,6 @@
 'use client';
 
+import { ResetPasswordModal } from '@/components/admin/ResetPasswordModal';
 import { useAuth } from '@/contexts/AuthContext';
 import { ADMIN_EMAIL } from '@/lib/admin';
 import { auth } from '@/lib/firebase';
@@ -10,6 +11,7 @@ import {
   Ban,
   CheckCircle2,
   Eye,
+  KeyRound,
   Mail,
   RefreshCw,
   Search,
@@ -97,6 +99,7 @@ export default function AdminPage() {
   const [search, setSearch] = useState('');
   const [actionUid, setActionUid] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [resetPwUser, setResetPwUser] = useState<AdminUser | null>(null);
 
   // Redirect non-admin users
   useEffect(() => {
@@ -450,6 +453,18 @@ export default function AdminPage() {
                               </button>
                             )}
 
+                            {/* Reset Password */}
+                            {!isAdmin && !isSelf && (
+                              <button
+                                onClick={() => setResetPwUser(u)}
+                                disabled={busy}
+                                title={`Reset password for ${u.email}`}
+                                className='rounded-lg border border-blue-200 bg-blue-50 p-1.5 text-blue-600 hover:bg-blue-100 disabled:opacity-50 dark:border-blue-900 dark:bg-blue-950/30 dark:text-blue-400 dark:hover:bg-blue-950/50'
+                              >
+                                <KeyRound size={13} />
+                              </button>
+                            )}
+
                             {/* Disable / Enable */}
                             {!isAdmin && !isSelf && (
                               <button
@@ -594,6 +609,13 @@ export default function AdminPage() {
                               <UserCog size={11} /> Impersonate
                             </button>
                             <button
+                              onClick={() => setResetPwUser(u)}
+                              disabled={busy}
+                              className='flex items-center gap-1 rounded-lg border border-blue-200 bg-blue-50 px-2.5 py-1.5 text-xs font-medium text-blue-600 dark:border-blue-900 dark:bg-blue-950/30 dark:text-blue-400'
+                            >
+                              <KeyRound size={11} /> Reset PW
+                            </button>
+                            <button
                               onClick={() => handleToggleDisable(u)}
                               disabled={busy}
                               className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors disabled:opacity-50 ${
@@ -647,6 +669,14 @@ export default function AdminPage() {
           </div>
         )}
       </div>
+
+      {resetPwUser && (
+        <ResetPasswordModal
+          uid={resetPwUser.uid}
+          email={resetPwUser.email}
+          onClose={() => setResetPwUser(null)}
+        />
+      )}
     </div>
   );
 }
