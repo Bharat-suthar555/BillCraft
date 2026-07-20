@@ -1,4 +1,4 @@
-import type { MetadataRoute } from 'next'
+import type { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
@@ -18,11 +18,6 @@ export default function manifest(): MetadataRoute.Manifest {
         // @ts-expect-error — purpose is valid in the spec but not yet in the Next.js type
         purpose: 'any maskable',
       },
-      {
-        src: '/icon.svg',
-        sizes: 'any',
-        type: 'image/svg+xml',
-      },
     ],
-  }
+  };
 }

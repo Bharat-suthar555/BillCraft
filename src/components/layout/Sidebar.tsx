@@ -83,9 +83,12 @@ export function Sidebar() {
     >
       {/* ── Logo ─────────────────────────────────────────── */}
       <div className='flex h-14 items-center border-b border-sidebar-border px-4'>
-        <div className='gradient-primary flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-xs font-black text-white'>
-          BC
-        </div>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src='/logo-mark.png'
+          alt='BillCraft'
+          className='h-8 w-8 shrink-0 object-contain'
+        />
         {!collapsed && (
           <div className='ml-3 overflow-hidden'>
             <div className='gradient-text text-sm font-bold leading-none'>

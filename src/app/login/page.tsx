@@ -172,8 +172,13 @@ export default function LoginPage() {
       <div className='relative w-full max-w-sm'>
         {/* Logo */}
         <div className='auth-fade-up mb-8 flex flex-col items-center gap-3'>
-          <div className='auth-logo-glow gradient-primary flex h-16 w-16 items-center justify-center rounded-2xl text-xl font-black text-white'>
-            BC
+          <div className='auth-logo-glow flex h-16 w-16 items-center justify-center rounded-2xl bg-white p-2'>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src='/logo-mark.png'
+              alt='BillCraft'
+              className='h-full w-full object-contain'
+            />
           </div>
           <div className='text-center'>
             <div className='gradient-text text-3xl font-black tracking-tight'>
