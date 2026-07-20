@@ -362,7 +362,9 @@ function InvoicePage({
           {template.showSqft && (
             <Text style={[s.tableHeaderCell, s.colSqft]}>sq. ft</Text>
           )}
-          <Text style={[s.tableHeaderCell, s.colRate]}>Rate</Text>
+          {template.showRate !== false && (
+            <Text style={[s.tableHeaderCell, s.colRate]}>Rate</Text>
+          )}
           <Text style={[s.tableHeaderCell, s.colAmt, { borderRightWidth: 0 }]}>
             Amount
           </Text>
@@ -386,15 +388,17 @@ function InvoicePage({
             {template.showSqft && (
               <Text style={[s.tableCell, s.colSqft]}>{item.sqft}</Text>
             )}
-            <Text
-              style={[
-                s.tableCell,
-                s.colRate,
-                { textAlign: 'right', paddingRight: 8 },
-              ]}
-            >
-              {item.rate}
-            </Text>
+            {template.showRate !== false && (
+              <Text
+                style={[
+                  s.tableCell,
+                  s.colRate,
+                  { textAlign: 'right', paddingRight: 8 },
+                ]}
+              >
+                {item.rate}
+              </Text>
+            )}
             <Text
               style={[
                 s.tableCell,
@@ -429,9 +433,11 @@ function InvoicePage({
                 <Text> </Text>
               </View>
             )}
-            <View style={[s.tableCell, s.colRate]}>
-              <Text> </Text>
-            </View>
+            {template.showRate !== false && (
+              <View style={[s.tableCell, s.colRate]}>
+                <Text> </Text>
+              </View>
+            )}
             <View style={[s.tableCell, s.colAmt, { borderRightWidth: 0 }]}>
               <Text> </Text>
             </View>

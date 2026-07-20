@@ -266,6 +266,17 @@ export function TemplateEditor({ template, onChange, onSave, saving }: Props) {
           checked={template.showSqft}
           onChange={(v) => set('showSqft', v)}
         />
+        <Toggle
+          label='Show Rate column'
+          checked={template.showRate ?? true}
+          onChange={(v) => set('showRate', v)}
+        />
+        {template.showRate === false && (
+          <p className='rounded-lg bg-blue-50 px-3 py-2 text-[11px] text-blue-700'>
+            With Rate hidden, Amount becomes directly editable per item instead
+            of being calculated.
+          </p>
+        )}
       </div>
 
       {/* Page overflow */}

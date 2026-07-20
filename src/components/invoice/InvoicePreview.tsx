@@ -341,7 +341,7 @@ export function InvoicePreview({ invoice, template, scale = 1 }: Props) {
               </th>
               {template.showSize && <th style={th(88)}>Size</th>}
               {template.showSqft && <th style={th(66)}>sq. ft</th>}
-              <th style={th(80)}>Rate</th>
+              {template.showRate !== false && <th style={th(80)}>Rate</th>}
               <th style={{ ...th(110), borderRight: 'none' }}>Amount</th>
             </tr>
           </thead>
@@ -352,7 +352,9 @@ export function InvoicePreview({ invoice, template, scale = 1 }: Props) {
                 <td style={td(undefined, 'left', 10)}>{item.description}</td>
                 {template.showSize && <td style={td(88)}>{item.size}</td>}
                 {template.showSqft && <td style={td(66)}>{item.sqft}</td>}
-                <td style={td(80, 'right', 4, 8)}>{item.rate}</td>
+                {template.showRate !== false && (
+                  <td style={td(80, 'right', 4, 8)}>{item.rate}</td>
+                )}
                 <td style={{ ...td(110, 'right', 4, 8), borderRight: 'none' }}>
                   {item.amount > 0 ? item.amount.toLocaleString('en-IN') : ''}
                 </td>
@@ -371,7 +373,9 @@ export function InvoicePreview({ invoice, template, scale = 1 }: Props) {
                 {template.showSqft && (
                   <td style={{ borderRight: '1px solid #999' }} />
                 )}
-                <td style={{ borderRight: '1px solid #999' }} />
+                {template.showRate !== false && (
+                  <td style={{ borderRight: '1px solid #999' }} />
+                )}
                 <td />
               </tr>
             ))}

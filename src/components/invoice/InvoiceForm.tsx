@@ -22,12 +22,11 @@ interface Props {
   saving?: boolean;
 }
 
-// Amount = Rate × sq.ft when the sq.ft column is shown; otherwise Rate × Size,
-// so hiding sq.ft doesn't silently drop the quantity from the calculation.
 function computeAmount(
-  item: Pick<LineItem, 'rate' | 'sqft' | 'size'>,
+  item: Pick<LineItem, 'rate' | 'sqft' | 'size' | 'amount'>,
   template: TemplateSettings,
 ): number {
+  if (template.showRate === false) return item.amount || 0;
   const rate = parseFloat(item.rate) || 0;
   const qty = template.showSqft
     ? parseFloat(item.sqft) || 0
@@ -159,7 +158,12 @@ export function InvoiceForm({
         <div className='space-y-3 sm:hidden'>
           {fields.map((field, index) => {
             const amount = computeAmount(
-              values.lineItems[index] ?? { rate: '', sqft: '', size: '' },
+              values.lineItems[index] ?? {
+                rate: '',
+                sqft: '',
+                size: '',
+                amount: 0,
+              },
               template,
             );
             return (
@@ -212,30 +216,45 @@ export function InvoiceForm({
                       />
                     </div>
                   )}
-                  <div className='space-y-1'>
-                    <Label className='text-[10px] text-muted-foreground'>
-                      Rate ({template.currencySymbol})
-                    </Label>
-                    <Input
-                      type='number'
-                      min='0'
-                      step='0.01'
-                      placeholder='0.00'
-                      className='h-9'
-                      {...register(`lineItems.${index}.rate`)}
-                    />
-                  </div>
+                  {template.showRate !== false && (
+                    <div className='space-y-1'>
+                      <Label className='text-[10px] text-muted-foreground'>
+                        Rate ({template.currencySymbol})
+                      </Label>
+                      <Input
+                        type='number'
+                        min='0'
+                        step='0.01'
+                        placeholder='0.00'
+                        className='h-9'
+                        {...register(`lineItems.${index}.rate`)}
+                      />
+                    </div>
+                  )}
                   <div className='space-y-1'>
                     <Label className='text-[10px] text-muted-foreground'>
                       Amount
                     </Label>
-                    <div className='flex h-9 items-center justify-end rounded-md border border-input bg-muted/40 px-3 text-sm font-medium'>
-                      {amount > 0
-                        ? amount.toLocaleString('en-IN', {
-                            minimumFractionDigits: 2,
-                          })
-                        : '—'}
-                    </div>
+                    {template.showRate === false ? (
+                      <Input
+                        type='number'
+                        min='0'
+                        step='0.01'
+                        placeholder='0.00'
+                        className='h-9 text-right'
+                        {...register(`lineItems.${index}.amount`, {
+                          valueAsNumber: true,
+                        })}
+                      />
+                    ) : (
+                      <div className='flex h-9 items-center justify-end rounded-md border border-input bg-muted/40 px-3 text-sm font-medium'>
+                        {amount > 0
+                          ? amount.toLocaleString('en-IN', {
+                              minimumFractionDigits: 2,
+                            })
+                          : '—'}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -256,9 +275,11 @@ export function InvoiceForm({
                 {template.showSqft && (
                   <th className='pb-2 text-left w-16'>sq.ft</th>
                 )}
-                <th className='pb-2 text-left w-20'>
-                  Rate ({template.currencySymbol})
-                </th>
+                {template.showRate !== false && (
+                  <th className='pb-2 text-left w-20'>
+                    Rate ({template.currencySymbol})
+                  </th>
+                )}
                 <th className='pb-2 text-right w-20'>Amount</th>
                 <th className='pb-2 w-8'></th>
               </tr>
@@ -266,7 +287,12 @@ export function InvoiceForm({
             <tbody className='divide-y divide-border'>
               {fields.map((field, index) => {
                 const amount = computeAmount(
-                  values.lineItems[index] ?? { rate: '', sqft: '', size: '' },
+                  values.lineItems[index] ?? {
+                    rate: '',
+                    sqft: '',
+                    size: '',
+                    amount: 0,
+                  },
                   template,
                 );
                 return (

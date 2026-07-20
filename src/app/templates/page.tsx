@@ -8,7 +8,12 @@ import {
   getTemplates,
   updateTemplate,
 } from '@/lib/firestore';
-import { DEFAULT_TEMPLATE, EMPTY_LINE_ITEM, MR_TEMPLATE, TemplateSettings } from '@/types';
+import {
+  DEFAULT_TEMPLATE,
+  EMPTY_LINE_ITEM,
+  MR_TEMPLATE,
+  TemplateSettings,
+} from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
 import { Check, ChevronRight, Copy, PlusCircle, Trash2 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -80,23 +85,29 @@ export default function TemplatesPage() {
     return () => ro.disconnect();
   }, []);
 
-  const handleNew = useCallback(async (preset: Omit<TemplateSettings, '_id'> = DEFAULT_TEMPLATE) => {
-    setSaving(true);
-    try {
-      const t = await createTemplate({
-        ...preset,
-        name: preset === MR_TEMPLATE ? 'MR Invoice' : `Template ${templates.length + 1}`,
-      });
-      setTemplates((prev) => [t, ...prev]);
-      setSelected(t);
-      setDirty(null);
-      toast.success('New template created');
-    } catch {
-      toast.error('Failed to create');
-    } finally {
-      setSaving(false);
-    }
-  }, [templates.length]);
+  const handleNew = useCallback(
+    async (preset: Omit<TemplateSettings, '_id'> = DEFAULT_TEMPLATE) => {
+      setSaving(true);
+      try {
+        const t = await createTemplate({
+          ...preset,
+          name:
+            preset === MR_TEMPLATE
+              ? 'MR Invoice'
+              : `Template ${templates.length + 1}`,
+        });
+        setTemplates((prev) => [t, ...prev]);
+        setSelected(t);
+        setDirty(null);
+        toast.success('New template created');
+      } catch {
+        toast.error('Failed to create');
+      } finally {
+        setSaving(false);
+      }
+    },
+    [templates.length],
+  );
 
   const handleSave = useCallback(async () => {
     if (!active) return;
@@ -240,7 +251,7 @@ export default function TemplatesPage() {
                 <div className='text-xs text-muted-foreground truncate max-w-40'>
                   {t.companyName}
                 </div>
-                <div className='mt-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity'>
+                <div className='mt-2 flex gap-1 opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100'>
                   <button
                     onClick={(e) => {
                       e.stopPropagation();

@@ -15,13 +15,8 @@ export interface TemplateSettings {
   currencySymbol: string;
   showSize: boolean;
   showSqft: boolean;
-  // When false, the company name renders as plain text instead of the
-  // accent-colored badge box. Defaults to true (badge) when unset, so
-  // existing templates keep their current look.
+  showRate?: boolean;
   nameBadge?: boolean;
-  // What happens when line items don't fit on one page.
-  // 'continue' — one running table, header row repeats on later pages, single grand total (default).
-  // 'split'    — each page repeats the full invoice header and shows its own page-only total.
   overflowMode?: 'continue' | 'split';
   createdAt?: string;
   updatedAt?: string;
@@ -43,6 +38,7 @@ export const DEFAULT_TEMPLATE: Omit<TemplateSettings, '_id'> = {
   currencySymbol: '₹',
   showSize: true,
   showSqft: true,
+  showRate: true,
   nameBadge: true,
   overflowMode: 'continue',
 };
@@ -63,6 +59,7 @@ export const MR_TEMPLATE: Omit<TemplateSettings, '_id'> = {
   currencySymbol: '₹',
   showSize: true,
   showSqft: true,
+  showRate: true,
   nameBadge: false,
   overflowMode: 'continue',
 };

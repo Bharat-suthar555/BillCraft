@@ -56,6 +56,7 @@ function templateFromDb(
     showSize: (data.showSize as boolean) ?? true,
     showSqft: (data.showSqft as boolean) ?? true,
     nameBadge: (data.nameBadge as boolean) ?? true,
+    showRate: (data.showRate as boolean) ?? true,
     overflowMode:
       (data.overflowMode as TemplateSettings['overflowMode']) ?? 'continue',
     createdAt: data.createdAt
