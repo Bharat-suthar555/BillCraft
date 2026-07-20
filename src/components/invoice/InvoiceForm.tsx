@@ -4,15 +4,30 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { getInvoices } from '@/lib/firestore';
 import {
   EMPTY_LINE_ITEM,
   InvoiceData,
   LineItem,
   TemplateSettings,
 } from '@/types';
-import { PlusCircle, Trash2 } from 'lucide-react';
-import { useCallback, useEffect } from 'react';
+import {
+  Check,
+  ChevronDown,
+  PlusCircle,
+  Search,
+  Trash2,
+  Users,
+} from 'lucide-react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
+
+interface SavedCustomer {
+  name: string;
+  phone: string;
+  address: string;
+  lastUsed: number;
+}
 
 interface Props {
   template: TemplateSettings;
@@ -73,6 +88,66 @@ export function InvoiceForm({
 
   const values = watch();
 
+  // ── Existing customers, derived from past invoices ──────────────────
+  const [customers, setCustomers] = useState<SavedCustomer[]>([]);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [customerSearch, setCustomerSearch] = useState('');
+  const pickerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    getInvoices()
+      .then((invoices) => {
+        const byKey = new Map<string, SavedCustomer>();
+        for (const inv of invoices) {
+          const name = inv.customerName?.trim();
+          if (!name) continue;
+          const key = (inv.customerPhone?.trim() || name).toLowerCase();
+          const lastUsed = inv.createdAt
+            ? new Date(inv.createdAt).getTime()
+            : 0;
+          const existing = byKey.get(key);
+          if (!existing || lastUsed > existing.lastUsed) {
+            byKey.set(key, {
+              name,
+              phone: inv.customerPhone ?? '',
+              address: inv.customerAddress ?? '',
+              lastUsed,
+            });
+          }
+        }
+        setCustomers(
+          Array.from(byKey.values()).sort((a, b) => b.lastUsed - a.lastUsed),
+        );
+      })
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    if (!pickerOpen) return;
+    const onClickOutside = (e: MouseEvent) => {
+      if (!pickerRef.current?.contains(e.target as Node)) setPickerOpen(false);
+    };
+    document.addEventListener('mousedown', onClickOutside);
+    return () => document.removeEventListener('mousedown', onClickOutside);
+  }, [pickerOpen]);
+
+  const filteredCustomers = useMemo(() => {
+    const q = customerSearch.trim().toLowerCase();
+    if (!q) return customers;
+    return customers.filter(
+      (c) =>
+        c.name.toLowerCase().includes(q) || c.phone.toLowerCase().includes(q),
+    );
+  }, [customers, customerSearch]);
+
+  const selectCustomer = (c: SavedCustomer) => {
+    setValue('customerName', c.name, { shouldDirty: true });
+    setValue('customerPhone', c.phone, { shouldDirty: true });
+    setValue('customerAddress', c.address, { shouldDirty: true });
+    setPickerOpen(false);
+    setCustomerSearch('');
+  };
+
   const computeTotal = useCallback(
     (items: LineItem[]) => {
       return items.reduce(
@@ -118,9 +193,78 @@ export function InvoiceForm({
 
       {/* Customer details */}
       <div className='space-y-4'>
-        <h3 className='text-sm font-semibold text-foreground uppercase tracking-wide'>
-          Customer Details
-        </h3>
+        <div className='flex items-center justify-between gap-2'>
+          <h3 className='text-sm font-semibold text-foreground uppercase tracking-wide'>
+            Customer Details
+          </h3>
+          {customers.length > 0 && (
+            <div ref={pickerRef} className='relative'>
+              <button
+                type='button'
+                onClick={() => setPickerOpen((o) => !o)}
+                className='inline-flex items-center gap-1 rounded-md border border-border px-2 py-1 text-[11px] font-medium normal-case tracking-normal text-muted-foreground transition-colors hover:bg-accent hover:text-foreground'
+              >
+                <Users size={12} />
+                Select existing
+                <ChevronDown size={12} />
+              </button>
+              {pickerOpen && (
+                <div className='absolute right-0 z-20 mt-1 w-72 max-w-[80vw] rounded-lg border border-border bg-card shadow-lg'>
+                  <div className='relative border-b border-border p-2'>
+                    <Search
+                      size={12}
+                      className='absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground'
+                    />
+                    <input
+                      autoFocus
+                      value={customerSearch}
+                      onChange={(e) => setCustomerSearch(e.target.value)}
+                      placeholder='Search customers…'
+                      className='w-full rounded-md border border-input bg-background py-1.5 pl-7 pr-2 text-xs focus:outline-none focus:ring-1 focus:ring-ring'
+                    />
+                  </div>
+                  <div className='max-h-56 overflow-y-auto py-1'>
+                    {filteredCustomers.length === 0 ? (
+                      <p className='px-3 py-4 text-center text-xs text-muted-foreground'>
+                        No matches
+                      </p>
+                    ) : (
+                      filteredCustomers.map((c) => {
+                        const isCurrent =
+                          values.customerName === c.name &&
+                          values.customerPhone === c.phone;
+                        return (
+                          <button
+                            type='button'
+                            key={`${c.phone}|${c.name}`}
+                            onClick={() => selectCustomer(c)}
+                            className='flex w-full items-center justify-between gap-2 px-3 py-2 text-left hover:bg-accent'
+                          >
+                            <div className='min-w-0'>
+                              <div className='truncate text-xs font-medium text-foreground'>
+                                {c.name}
+                              </div>
+                              <div className='truncate text-[11px] text-muted-foreground'>
+                                {c.phone || 'No phone'}
+                                {c.address && ` · ${c.address}`}
+                              </div>
+                            </div>
+                            {isCurrent && (
+                              <Check
+                                size={13}
+                                className='shrink-0 text-blue-500'
+                              />
+                            )}
+                          </button>
+                        );
+                      })
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
         <div className='space-y-1.5'>
           <Label htmlFor='customerName'>Customer Name</Label>
           <Input
@@ -327,22 +471,37 @@ export function InvoiceForm({
                         />
                       </td>
                     )}
-                    <td className='py-1.5 pr-1'>
-                      <Input
-                        type='number'
-                        min='0'
-                        step='0.01'
-                        placeholder='0.00'
-                        className='h-8'
-                        {...register(`lineItems.${index}.rate`)}
-                      />
-                    </td>
+                    {template.showRate !== false && (
+                      <td className='py-1.5 pr-1'>
+                        <Input
+                          type='number'
+                          min='0'
+                          step='0.01'
+                          placeholder='0.00'
+                          className='h-8'
+                          {...register(`lineItems.${index}.rate`)}
+                        />
+                      </td>
+                    )}
                     <td className='py-1.5 pr-1 text-right font-medium'>
-                      {amount > 0
-                        ? amount.toLocaleString('en-IN', {
-                            minimumFractionDigits: 2,
-                          })
-                        : '—'}
+                      {template.showRate === false ? (
+                        <Input
+                          type='number'
+                          min='0'
+                          step='0.01'
+                          placeholder='0.00'
+                          className='h-8 text-right'
+                          {...register(`lineItems.${index}.amount`, {
+                            valueAsNumber: true,
+                          })}
+                        />
+                      ) : amount > 0 ? (
+                        amount.toLocaleString('en-IN', {
+                          minimumFractionDigits: 2,
+                        })
+                      ) : (
+                        '—'
+                      )}
                     </td>
                     <td className='py-1.5'>
                       <button
