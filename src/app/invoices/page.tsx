@@ -119,8 +119,8 @@ export default function InvoicesPage() {
             label: 'Total',
             value: stats.total,
             icon: FileText,
-            color: '#1890ff',
-            bg: 'rgba(24,144,255,0.08)',
+            color: '#125a98',
+            bg: 'rgba(18,90,152,0.08)',
           },
           {
             label: 'Draft',

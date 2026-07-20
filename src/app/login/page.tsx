@@ -178,7 +178,7 @@ export default function LoginPage() {
       {/* ── Animated orbs ──────────────────────────────────────── */}
       <div className='pointer-events-none fixed inset-0 overflow-hidden'>
         <div className='auth-orb-1 absolute -left-56 -top-56 h-[650px] w-[650px] rounded-full bg-blue-500/20 blur-3xl dark:bg-blue-600/12' />
-        <div className='auth-orb-2 absolute -bottom-56 -right-56 h-[750px] w-[750px] rounded-full bg-purple-600/20 blur-3xl dark:bg-purple-700/12' />
+        <div className='auth-orb-2 absolute -bottom-56 -right-56 h-[750px] w-[750px] rounded-full bg-[#125a98]/20 blur-3xl dark:bg-[#125a98]/12' />
         <div className='auth-orb-3 absolute right-1/4 top-1/3 h-[450px] w-[450px] rounded-full bg-indigo-400/12 blur-3xl dark:bg-indigo-500/8' />
       </div>
 
@@ -398,8 +398,8 @@ export default function LoginPage() {
           >
             {FEATURES.map(({ icon: Icon, label, desc }) => (
               <div key={label} className='flex items-start gap-3'>
-                <div className='mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#1890ff]/10'>
-                  <Icon size={14} className='text-[#1890ff]' />
+                <div className='mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#125a98]/10'>
+                  <Icon size={14} className='text-[#125a98]' />
                 </div>
                 <div>
                   <div className='text-xs font-medium text-foreground'>

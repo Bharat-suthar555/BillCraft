@@ -39,7 +39,7 @@
   --card-foreground: hsl(0 0% 9%);
   --popover: hsl(0 0% 100%);
   --popover-foreground: hsl(0 0% 9%);
-  --primary: hsl(213 89% 55%);
+  --primary: hsl(208 79% 33%);
   --primary-foreground: hsl(0 0% 100%);
   --secondary: hsl(0 0% 96.1%);
   --secondary-foreground: hsl(0 0% 9%);
@@ -50,7 +50,7 @@
   --destructive: hsl(0 84.2% 60.2%);
   --border: hsl(0 0% 89.8%);
   --input: hsl(0 0% 89.8%);
-  --ring: hsl(213 89% 55%);
+  --ring: hsl(208 79% 33%);
   --radius: 0.625rem;
   --sidebar: hsl(0 0% 100%);
   --sidebar-foreground: hsl(0 0% 9%);
@@ -65,7 +65,7 @@
   --card-foreground: hsl(0 0% 98%);
   --popover: hsl(0 0% 9%);
   --popover-foreground: hsl(0 0% 98%);
-  --primary: hsl(213 89% 60%);
+  --primary: hsl(208 75% 52%);
   --primary-foreground: hsl(0 0% 100%);
   --secondary: hsl(0 0% 14.9%);
   --secondary-foreground: hsl(0 0% 98%);
@@ -76,7 +76,7 @@
   --destructive: hsl(0 62.8% 40%);
   --border: hsl(0 0% 18%);
   --input: hsl(0 0% 18%);
-  --ring: hsl(213 89% 60%);
+  --ring: hsl(208 75% 52%);
   --sidebar: hsl(240 5.9% 10%);
   --sidebar-foreground: hsl(0 0% 98%);
   --sidebar-border: hsl(0 0% 18%);
@@ -115,7 +115,7 @@ body {
 /* ── Potential-Adventure utility classes ─────────────────────────────────── */
 
 .gradient-primary {
-  background: linear-gradient(135deg, #1890ff 0%, #722ed1 100%);
+  background: linear-gradient(135deg, #125a98 0%, #2f8fe0 100%);
   color: #fff;
   transition:
     background 0.2s ease,
@@ -124,7 +124,7 @@ body {
 }
 
 .gradient-primary:hover {
-  background: linear-gradient(135deg, #0c7ae8 0%, #5f24b8 100%);
+  background: linear-gradient(135deg, #0d4a80 0%, #1e6fb8 100%);
 }
 
 .gradient-primary:active {
@@ -179,7 +179,7 @@ body {
 }
 
 .gradient-text {
-  background: linear-gradient(135deg, #1890ff 0%, #722ed1 100%);
+  background: linear-gradient(135deg, #125a98 0%, #2f8fe0 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -278,15 +278,15 @@ body {
 .nav-item-active {
   background: linear-gradient(
     135deg,
-    rgba(24, 144, 255, 0.08) 0%,
-    rgba(114, 46, 209, 0.08) 100%
+    rgba(18, 90, 152, 0.1) 0%,
+    rgba(47, 143, 224, 0.08) 100%
   );
-  color: #1890ff;
+  color: #125a98;
   font-weight: 500;
 }
 
 .nav-item-active svg {
-  color: #1890ff;
+  color: #125a98;
 }
 
 /* ── Login page animations ──────────────────────────────────────────────────── */

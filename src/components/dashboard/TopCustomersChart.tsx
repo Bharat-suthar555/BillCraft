@@ -37,7 +37,11 @@ export function TopCustomersChart({ data, currencySymbol = '₹' }: Props) {
   const max = Math.max(...data.map((d) => d.total), 1);
 
   return (
-    <div className='space-y-3.5' role='img' aria-label='Top customers by revenue'>
+    <div
+      className='space-y-3.5'
+      role='img'
+      aria-label='Top customers by revenue'
+    >
       {data.map((c, i) => {
         const pct = (c.total / max) * 100;
         return (
@@ -55,7 +59,8 @@ export function TopCustomersChart({ data, currencySymbol = '₹' }: Props) {
                   width: grown ? `${pct}%` : '0%',
                   transitionDuration: '700ms',
                   transitionDelay: `${i * 60}ms`,
-                  background: 'linear-gradient(90deg, #1890ff 0%, #4dabff 100%)',
+                  background:
+                    'linear-gradient(90deg, #125a98 0%, #2f8fe0 100%)',
                 }}
               />
             </div>

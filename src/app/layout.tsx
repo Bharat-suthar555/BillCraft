@@ -17,7 +17,7 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
-  themeColor: '#1890ff',
+  themeColor: '#125a98',
 };
 
 export default function RootLayout({
@@ -29,7 +29,11 @@ export default function RootLayout({
     <html lang='en' suppressHydrationWarning>
       <head>
         {/* Polyfill: some bundled libs call Image() without `new` — this allows both */}
-        <script dangerouslySetInnerHTML={{ __html: `try{var _I=window.Image;window.Image=function(){return new _I(...arguments)};Object.assign(window.Image,_I);window.Image.prototype=_I.prototype}catch(e){}` }} />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{var _I=window.Image;window.Image=function(){return new _I(...arguments)};Object.assign(window.Image,_I);window.Image.prototype=_I.prototype}catch(e){}`,
+          }}
+        />
       </head>
       <body className={geist.className}>
         <ThemeProvider attribute='class' defaultTheme='light' enableSystem>

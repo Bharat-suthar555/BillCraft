@@ -259,7 +259,7 @@ export function MobileBottomNav() {
             href={href}
             className={cn(
               'flex flex-1 flex-col items-center justify-center py-3 text-xs gap-1 transition-colors',
-              active ? 'text-[#1890ff] font-medium' : 'text-muted-foreground',
+              active ? 'text-[#125a98] font-medium' : 'text-muted-foreground',
             )}
           >
             <Icon size={22} />

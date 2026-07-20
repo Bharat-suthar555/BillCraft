@@ -114,7 +114,7 @@ export default function InvoiceViewPage({ params, searchParams }: PageProps) {
         <p className='text-muted-foreground'>Invoice not found</p>
         <Link
           href='/invoices'
-          className='text-sm text-[#1890ff] hover:underline'
+          className='text-sm text-[#125a98] hover:underline'
         >
           Back to invoices
         </Link>
@@ -166,7 +166,7 @@ export default function InvoiceViewPage({ params, searchParams }: PageProps) {
                 setEditMode(true);
                 setActiveTab('form');
               }}
-              className='inline-flex items-center gap-1.5 rounded-lg border border-[#1890ff]/30 px-3 py-1.5 text-sm text-[#1890ff] hover:bg-[#1890ff]/5 transition-colors'
+              className='inline-flex items-center gap-1.5 rounded-lg border border-[#125a98]/30 px-3 py-1.5 text-sm text-[#125a98] hover:bg-[#125a98]/5 transition-colors'
             >
               <Pencil size={13} /> Edit Invoice
             </button>

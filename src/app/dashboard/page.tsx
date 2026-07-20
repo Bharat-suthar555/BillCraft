@@ -98,8 +98,8 @@ export default function DashboardPage() {
       label: 'Total Invoices',
       value: stats.total,
       icon: FileText,
-      color: '#1890ff',
-      bg: 'rgba(24,144,255,0.08)',
+      color: '#125a98',
+      bg: 'rgba(18,90,152,0.08)',
     },
     {
       label: 'Customers',
@@ -158,7 +158,7 @@ export default function DashboardPage() {
         {/* Top customers chart */}
         <div className='tdc-card animate-rise stagger-5 lg:col-span-3'>
           <div className='mb-4 flex items-center gap-2'>
-            <TrendingUp size={15} className='text-[#1890ff]' />
+            <TrendingUp size={15} className='text-[#125a98]' />
             <h2 className='text-sm font-semibold text-foreground'>
               Top Customers by Revenue
             </h2>
@@ -181,7 +181,7 @@ export default function DashboardPage() {
         {/* Recent invoices */}
         <div className='tdc-card animate-rise stagger-6 p-0! overflow-hidden lg:col-span-2'>
           <div className='flex items-center gap-2 border-b border-border px-4 py-3.5'>
-            <CheckCircle2 size={15} className='text-[#722ed1]' />
+            <CheckCircle2 size={15} className='text-[#2f8fe0]' />
             <h2 className='text-sm font-semibold text-foreground'>
               Recent Invoices
             </h2>
@@ -189,7 +189,10 @@ export default function DashboardPage() {
           {loading ? (
             <div className='space-y-3 p-4'>
               {[1, 2, 3].map((i) => (
-                <div key={i} className='h-10 animate-pulse rounded-lg bg-muted' />
+                <div
+                  key={i}
+                  className='h-10 animate-pulse rounded-lg bg-muted'
+                />
               ))}
             </div>
           ) : recent.length === 0 ? (

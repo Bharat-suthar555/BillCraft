@@ -225,13 +225,13 @@ export default function TemplatesPage() {
                 }}
                 className={`group relative cursor-pointer rounded-xl border-2 p-3 transition-all ${
                   selected?._id === t._id
-                    ? 'border-[#1890ff] shadow-md shadow-[#1890ff]/10'
+                    ? 'border-[#125a98] shadow-md shadow-[#125a98]/10'
                     : 'border-border hover:border-muted-foreground/30'
                 }`}
                 style={{ minWidth: 176 }}
               >
                 {selected?._id === t._id && (
-                  <span className='absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-linear-to-br from-[#1890ff] to-[#722ed1] text-white'>
+                  <span className='absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-linear-to-br from-[#125a98] to-[#2f8fe0] text-white'>
                     <Check size={11} />
                   </span>
                 )}
