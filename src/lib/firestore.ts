@@ -88,6 +88,7 @@ function invoiceFromDb(
     total: (data.total as number) ?? 0,
     status: (data.status as InvoiceData['status']) ?? 'draft',
     notes: (data.notes as string) ?? '',
+    checkedByArchitect: (data.checkedByArchitect as boolean) ?? false,
     createdAt: data.createdAt
       ? new Date(data.createdAt as number).toISOString()
       : undefined,

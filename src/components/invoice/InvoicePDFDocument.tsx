@@ -471,9 +471,12 @@ function InvoicePage({
               <Text style={{ fontSize: 11, fontFamily: 'Helvetica-Bold' }}>
                 Checked By Architect
               </Text>
-              <Text style={[s.sigLine, { fontFamily: 'Helvetica-Bold' }]}>
-                Architect Signature
-              </Text>
+              <View style={{ alignItems: 'flex-end' }}>
+                <View style={{ height: 36 }} />
+                <Text style={[s.sigLine, { fontFamily: 'Helvetica-Bold' }]}>
+                  Architect Signature
+                </Text>
+              </View>
             </View>
           )}
           <View style={s.footer}>

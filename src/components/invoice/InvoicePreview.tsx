@@ -432,6 +432,8 @@ export function InvoicePreview({ invoice, template, scale = 1 }: Props) {
             Checked By Architect
           </span>
           <div style={{ textAlign: 'right', fontSize: 11 }}>
+            {/* Signing space */}
+            <div style={{ height: 48 }} />
             <div
               style={{
                 borderTop: '1px solid #444',

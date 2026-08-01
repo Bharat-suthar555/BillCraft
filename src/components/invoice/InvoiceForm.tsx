@@ -91,6 +91,11 @@ export function InvoiceForm({
     initialData?.checkedByArchitect ?? false,
   );
 
+  useEffect(() => {
+    setCheckedByArchitect(initialData?.checkedByArchitect ?? false);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialData?.checkedByArchitect]);
+
   // ── Existing customers, derived from past invoices ──────────────────
   const [customers, setCustomers] = useState<SavedCustomer[]>([]);
   const [pickerOpen, setPickerOpen] = useState(false);
