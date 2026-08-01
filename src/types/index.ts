@@ -85,6 +85,7 @@ export interface InvoiceData {
   total: number;
   status: 'draft' | 'sent' | 'paid';
   notes: string;
+  checkedByArchitect?: boolean;
   createdAt?: string;
   updatedAt?: string;
   template?: TemplateSettings;

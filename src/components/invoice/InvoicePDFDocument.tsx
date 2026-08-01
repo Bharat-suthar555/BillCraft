@@ -457,12 +457,32 @@ function InvoicePage({
 
       {/* ══ FOOTER ═════════════════════════════════════════════ */}
       {showFooter && (
-        <View style={s.footer}>
-          <Text style={s.thankYou}>{template.footerText}</Text>
-          {template.showSignature && (
-            <Text style={s.sigLine}>Authorised Signature</Text>
+        <>
+          {invoice.checkedByArchitect && (
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'flex-end',
+                marginTop: 14,
+                paddingTop: 4,
+              }}
+            >
+              <Text style={{ fontSize: 11, fontFamily: 'Helvetica-Bold' }}>
+                Checked By Architect
+              </Text>
+              <Text style={[s.sigLine, { fontFamily: 'Helvetica-Bold' }]}>
+                Architect Signature
+              </Text>
+            </View>
           )}
-        </View>
+          <View style={s.footer}>
+            <Text style={s.thankYou}>{template.footerText}</Text>
+            {template.showSignature && (
+              <Text style={s.sigLine}>Authorised Signature</Text>
+            )}
+          </View>
+        </>
       )}
     </Page>
   );

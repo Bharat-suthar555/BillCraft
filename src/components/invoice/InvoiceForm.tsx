@@ -87,6 +87,9 @@ export function InvoiceForm({
   });
 
   const values = watch();
+  const [checkedByArchitect, setCheckedByArchitect] = useState(
+    initialData?.checkedByArchitect ?? false,
+  );
 
   // ── Existing customers, derived from past invoices ──────────────────
   const [customers, setCustomers] = useState<SavedCustomer[]>([]);
@@ -164,9 +167,14 @@ export function InvoiceForm({
       amount: computeAmount(item, template),
     }));
     const total = computeTotal(updatedItems);
-    onChange?.({ ...values, lineItems: updatedItems, total });
+    onChange?.({
+      ...values,
+      lineItems: updatedItems,
+      total,
+      checkedByArchitect,
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify(values), template]);
+  }, [JSON.stringify(values), template, checkedByArchitect]);
 
   const onSubmit = (data: FormValues) => {
     const updatedItems = data.lineItems.map((item) => ({
@@ -174,7 +182,7 @@ export function InvoiceForm({
       amount: computeAmount(item, template),
     }));
     const total = computeTotal(updatedItems);
-    onSave?.({ ...data, lineItems: updatedItems, total });
+    onSave?.({ ...data, lineItems: updatedItems, total, checkedByArchitect });
   };
 
   return (
@@ -554,6 +562,24 @@ export function InvoiceForm({
           rows={2}
           {...register('notes')}
         />
+      </div>
+
+      {/* Architect check */}
+      <div className='flex items-center gap-3 rounded-lg border border-border bg-muted/30 px-3 py-2.5'>
+        <input
+          id='checkedByArchitect'
+          type='checkbox'
+          checked={checkedByArchitect}
+          onChange={(e) => setCheckedByArchitect(e.target.checked)}
+          className='h-4 w-4 rounded border-border accent-current cursor-pointer'
+          style={{ accentColor: template.primaryColor }}
+        />
+        <Label
+          htmlFor='checkedByArchitect'
+          className='cursor-pointer select-none text-sm font-medium'
+        >
+          Checked By Architect
+        </Label>
       </div>
 
       <Button
