@@ -418,6 +418,35 @@ export function InvoicePreview({ invoice, template, scale = 1 }: Props) {
         </div>
       </div>
 
+      {/* ══ CHECKED BY ARCHITECT ══════════════════════════════════════════ */}
+      {invoice.checkedByArchitect && (
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'flex-end',
+            padding: '10px 32px 0',
+          }}
+        >
+          <span style={{ fontWeight: 700, fontSize: 12 }}>
+            Checked By Architect
+          </span>
+          <div style={{ textAlign: 'right', fontSize: 11 }}>
+            <div
+              style={{
+                borderTop: '1px solid #444',
+                paddingTop: 5,
+                minWidth: 180,
+                color: '#222',
+                fontWeight: 700,
+              }}
+            >
+              Architect Signature
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ══ FOOTER ════════════════════════════════════════════════════════ */}
       <div
         style={{
